@@ -44,7 +44,7 @@ public class StudentService {
         student.setAge(studentDTO.getAge());
         student.setGrade_level(studentDTO.getGrade_level());
         student.setGender(studentDTO.getGender());
-        student.setStatus("Pending");
+        student.setStatus("Inactive");
         student.setUserStudent(myUser);
 
 
