@@ -51,7 +51,7 @@ public class SchoolService {
         school.setCity(schoolDTO.getCity());
         school.setRegion(schoolDTO.getRegion());
         school.setSupervisorName(schoolDTO.getSupervisorName());
-        school.setGender(schoolDTO.getGender());
+         school.setGender(schoolDTO.getGender());
 
         schoolRepository.save(school);
     }
