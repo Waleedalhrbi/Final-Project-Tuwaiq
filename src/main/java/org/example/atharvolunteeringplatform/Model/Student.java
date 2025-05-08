@@ -65,4 +65,9 @@ public class Student {
     Set<StudentOpportunityRequest> studentOpportunityRequests;
 
 
+    @ManyToMany
+    @JsonIgnore
+    private Set<Badge> badges;
+
+
 }
