@@ -56,4 +56,8 @@ public class MyUser {
 
     @OneToOne(cascade = CascadeType.ALL,mappedBy = "userStudent")
     private Student userStudent;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    @PrimaryKeyJoinColumn
+    private Organization organization;
 }
