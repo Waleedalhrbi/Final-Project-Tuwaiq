@@ -11,10 +11,14 @@ import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.School;
+import org.example.atharvolunteeringplatform.Model.Student;
+import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
+import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,7 +28,7 @@ public class SchoolService {
 
     private final SchoolRepository schoolRepository;
     private final MyUserRepository myUserRepository;
-
+    private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     public List<School> getAllSchool() {
         return schoolRepository.findAll();
     }
@@ -100,5 +104,37 @@ public class SchoolService {
         myUserRepository.delete(oldUser);
     }
 
+
+    //40
+    public void updateRequestStatus(Integer userId, Integer requestId, String status) {
+        School school = schoolRepository.findSchoolById(userId);
+        if (school == null) {
+            throw new ApiException("School not found");
+        }
+
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        if (request == null) {
+            throw new ApiException("Request not found");
+        }
+
+
+        Student student = request.getStudent();
+        if (!student.getSchool().getId().equals(school.getId())) {
+            throw new ApiException("This student does not belong to your school");
+        }
+
+
+        if (request.getOpportunity().getEndDate().isAfter(LocalDate.now())) {
+            throw new ApiException("Cannot update status. Opportunity has not ended yet");
+        }
+
+
+        if (!status.equals("completed") && !status.equals("incomplete")) {
+            throw new ApiException("Invalid status. Must be 'completed' or 'incomplete'");
+        }
+
+        request.setStatus(status.toLowerCase());
+        studentOpportunityRequestRepository.save(request);
+    }
 
 }
