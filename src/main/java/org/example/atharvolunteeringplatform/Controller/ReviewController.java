@@ -22,8 +22,8 @@ public class ReviewController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addReview(@RequestBody @Valid Review review) {
-        reviewService.addReview(review);
+    public ResponseEntity addReview(@RequestParam Integer opportunityId, @RequestParam Integer studentId,/*@AuthenticationPrincipal*/ @RequestParam Integer supervisorId,@RequestBody @Valid Review review) {
+        reviewService.addReview(opportunityId,studentId,review,supervisorId);
         return ResponseEntity.ok("Review added successfully");
     }
 

@@ -60,7 +60,12 @@ public class SchoolService {
         if (oldUser == null) {
             throw new ApiException("School not found");
         }
-        //اذاء السكول حالتها مفعله
+
+        // التحقق من أن حالة المدرسة مفعلة
+        if (!"Active".equalsIgnoreCase(schoolDTO.getStatus())) {
+            throw new ApiException("School must be in 'Active' status to allow update");
+        }
+
 
         School school = schoolRepository.findSchoolById(oldUser.getId());
         if (school == null) {

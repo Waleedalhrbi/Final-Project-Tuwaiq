@@ -49,6 +49,7 @@ public class StudentOpportunityRequest {
     @JsonIgnore
     private Student student;
 
+    //****
     @ManyToOne
     @JsonIgnore
     private Opportunity opportunity;
