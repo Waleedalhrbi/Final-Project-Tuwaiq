@@ -1,7 +1,7 @@
 package org.example.atharvolunteeringplatform.Service;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
-import org.example.atharvolunteeringplatform.Model.Complaints;
+import org.example.atharvolunteeringplatform.Model.Complaint;
 import org.example.atharvolunteeringplatform.Repository.ComplaintsRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,32 +16,32 @@ public class ComplaintsService {
 
     private final ComplaintsRepository complaintsRepository;
 
-    public List<Complaints> getAllComplaints() {
+    public List<Complaint> getAllComplaints() {
         return complaintsRepository.findAll();
     }
 
-    public void addComplaint(Complaints complaint) {
+    public void addComplaint(Complaint complaint) {
         complaint.setCreateAt(LocalDateTime.now());
         complaint.setStatus("In Progress");
         complaintsRepository.save(complaint);
     }
 
-    public void updateComplaint(Integer id, Complaints updatedComplaint) {
-        Complaints complaints=complaintsRepository.findComplaintsById(id);
-        if(complaints==null) {
+    public void updateComplaint(Integer id, Complaint updatedComplaint) {
+        Complaint complaint =complaintsRepository.findComplaintsById(id);
+        if(complaint ==null) {
             throw new ApiException("Complaint not found");}
 
-        complaints.setTitle(updatedComplaint.getTitle());
-        complaints.setDescription(updatedComplaint.getDescription());
-        complaints.setStatus(updatedComplaint.getStatus());
-        complaintsRepository.save(complaints);
+        complaint.setTitle(updatedComplaint.getTitle());
+        complaint.setDescription(updatedComplaint.getDescription());
+        complaint.setStatus(updatedComplaint.getStatus());
+        complaintsRepository.save(complaint);
     }
 
     public void deleteComplaint(Integer id) {
-        Complaints complaints=complaintsRepository.findComplaintsById(id);
-        if(complaints==null) {
+        Complaint complaint =complaintsRepository.findComplaintsById(id);
+        if(complaint ==null) {
             throw new ApiException("Complaint not found");}
-        complaintsRepository.delete(complaints);
+        complaintsRepository.delete(complaint);
     }
 
 

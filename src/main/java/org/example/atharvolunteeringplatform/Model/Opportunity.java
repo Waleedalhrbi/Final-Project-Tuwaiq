@@ -65,6 +65,11 @@ public class Opportunity {
     @JsonIgnore
     private Organization organization;
 
+//***
+    @OneToMany(mappedBy = "opportunity", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Complaint> complaints;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "opportunity")
     private Set<StudentOpportunityRequest>  studentOpportunityRequest;
 

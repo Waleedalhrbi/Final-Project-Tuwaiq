@@ -69,5 +69,13 @@ public class Student {
     @JsonIgnore
     private Set<Badge> badges;
 
+    @ManyToOne
+    private School school;
+
+    //**
+    @OneToMany(mappedBy = "students", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Complaint> complaints;
+
 
 }

@@ -33,17 +33,15 @@ public class SchoolService {
     public void addSchool(SchoolDTO schoolDTO) {
 
         MyUser myUser = new MyUser();
+        myUser.setName(schoolDTO.getName());
         myUser.setEmail(schoolDTO.getEmail());
         myUser.setPhone_number(schoolDTO.getPhoneNumber());
         myUser.setPassword(schoolDTO.getPassword());
 
 
 
-        myUser.setName(schoolDTO.getName());
-        myUser.setRole("school");
+        myUser.setRole("supervisor");
         myUser.setCreated_at(LocalDateTime.now());
-
-
         myUserRepository.save(myUser);
 
 
@@ -52,6 +50,7 @@ public class SchoolService {
         school.setRegion(schoolDTO.getRegion());
         school.setSupervisorName(schoolDTO.getSupervisorName());
          school.setGender(schoolDTO.getGender());
+         school.setStatus("Pending");
 
         schoolRepository.save(school);
     }
@@ -61,6 +60,7 @@ public class SchoolService {
         if (oldUser == null) {
             throw new ApiException("School not found");
         }
+        //اذاء السكول حالتها مفعله
 
         School school = schoolRepository.findSchoolById(oldUser.getId());
         if (school == null) {
@@ -71,7 +71,7 @@ public class SchoolService {
         oldUser.setEmail(schoolDTO.getEmail());
         oldUser.setPhone_number(schoolDTO.getPhoneNumber());
         oldUser.setPassword(schoolDTO.getPassword());
-        oldUser.setRole("school");
+        oldUser.setRole("supervisor");
 
 
         myUserRepository.save(oldUser);
@@ -81,6 +81,7 @@ public class SchoolService {
         school.setSupervisorName(schoolDTO.getSupervisorName());
         school.setGender(schoolDTO.getGender());
         school.setCity(schoolDTO.getCity());
+        school.setStatus("Pending");//الى ان تحصل على الموافقه بالتعديل
 
         schoolRepository.save(school);
     }
