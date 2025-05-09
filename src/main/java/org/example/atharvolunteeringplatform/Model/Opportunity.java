@@ -70,6 +70,9 @@ public class Opportunity {
     @JsonIgnore
     private Set<Complaint> complaints;
 
+    //****
+    @OneToMany(mappedBy = "opportunity", cascade = CascadeType.ALL)
+    private Set<StudentOpportunityRequest> studentOpportunityRequests;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "opportunity")
     private Set<StudentOpportunityRequest>  studentOpportunityRequest;
 

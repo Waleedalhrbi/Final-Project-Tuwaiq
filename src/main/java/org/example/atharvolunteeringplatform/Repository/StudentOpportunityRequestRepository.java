@@ -1,5 +1,9 @@
 package org.example.atharvolunteeringplatform.Repository;
 
+<<<<<<< HEAD
+=======
+import org.example.atharvolunteeringplatform.Model.Opportunity;
+>>>>>>> b781651c389f9168a607a989830639cf552ef553
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +16,9 @@ import java.util.List;
 public interface StudentOpportunityRequestRepository extends JpaRepository<StudentOpportunityRequest,Integer> {
 
     StudentOpportunityRequest findStudentOpportunityRequestById(Integer id);
+
+//***
+    StudentOpportunityRequest findByStudentAndOpportunity(Student student,Opportunity opportunity);
 
 
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Completed'")
