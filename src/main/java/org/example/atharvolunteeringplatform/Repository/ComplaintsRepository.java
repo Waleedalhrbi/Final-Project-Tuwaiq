@@ -1,13 +1,13 @@
 package org.example.atharvolunteeringplatform.Repository;
 
-//import com.example.final_project.Model.Complaints;
-import org.example.atharvolunteeringplatform.Model.Complaints;
+//import com.example.final_project.Model.Complaint;
+import org.example.atharvolunteeringplatform.Model.Complaint;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ComplaintsRepository extends JpaRepository<Complaints, Integer> {
+public interface ComplaintsRepository extends JpaRepository<Complaint, Integer> {
 
-    Complaints findComplaintsById(Integer id);
+    Complaint findComplaintsById(Integer id);
 
 }

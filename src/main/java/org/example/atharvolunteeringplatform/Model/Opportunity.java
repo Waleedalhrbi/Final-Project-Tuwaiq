@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -60,11 +61,13 @@ public class Opportunity {
     @NotEmpty(message = "Status is required")
     private String status;
 
-
-
     @ManyToOne
     @JsonIgnore
     private Organization organization;
 
+//***
+    @OneToMany(mappedBy = "opportunity", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Complaint> complaints;
 
 }

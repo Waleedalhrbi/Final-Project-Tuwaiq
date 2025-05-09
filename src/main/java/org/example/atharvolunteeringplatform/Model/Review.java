@@ -1,11 +1,10 @@
 package org.example.atharvolunteeringplatform.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,17 +29,17 @@ public class Review {
     @Max(value = 5, message = "Rating must be at most 5")
     private Integer rating;
 
-//    @Column(nullable = false)
-//    @NotEmpty(message = "comment cannot be Empty")
-//    private String comment;
+    @Column(nullable = false)
+    @NotEmpty(message = "comment cannot be Empty")
+    @Size(max = 500, message = "Comment cannot exceed 500 characters")
+    private String comment;
 
     private LocalDateTime createdAt;
-//
-//    @ManyToOne
-//    private School school;
-//
-//    //التاكد
-//    @ManyToOne
-//    private Oppertenity oppertenity;
+
+    @ManyToOne
+    private School school;
+
+    @ManyToOne
+    private Opportunity opportunity;
 
 }

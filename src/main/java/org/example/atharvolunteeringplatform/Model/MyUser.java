@@ -60,4 +60,7 @@ public class MyUser {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     @PrimaryKeyJoinColumn
     private Organization organization;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "myUser")
+    private School school;
 }
