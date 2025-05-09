@@ -2,16 +2,14 @@ package org.example.atharvolunteeringplatform.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -57,6 +55,7 @@ public class Opportunity {
     @NotEmpty(message = "Location is required")
     private String location;
 
+    @Pattern(regexp = "^(open|pending|completed|rejected|closed)$", message = "Status must be one of: open, pending, Completed, Rejected, Closed")
     @NotEmpty(message = "Status is required")
     private String status;
 
@@ -65,6 +64,9 @@ public class Opportunity {
     @ManyToOne
     @JsonIgnore
     private Organization organization;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "opportunity")
+    private Set<StudentOpportunityRequest>  studentOpportunityRequest;
 
 
 }

@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Model.Complaints;
 import org.example.atharvolunteeringplatform.Service.ComplaintsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -39,6 +41,15 @@ public class ComplaintsController {
         complaintsService.deleteComplaint(id);
         return ResponseEntity.ok("Complaint deleted successfully");
     }
+
+
+    @GetMapping("/by-date/{from}/{to}")
+    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDate from, @PathVariable LocalDate to) {
+        List<Complaints> complaints = complaintsService.getComplaintsByDateRange(from, to);
+        return ResponseEntity.status(HttpStatus.OK).body(complaints);
+    }
+
+
 
 
 }

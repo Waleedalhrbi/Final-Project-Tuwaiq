@@ -4,10 +4,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.Model.Opportunity;
+import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Service.OpportunityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/opportunity")
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class OpportunityController {
 
     private final OpportunityService opportunityService;
+    private final OpportunityRepository opportunityRepository;
 
     @GetMapping("/get-all")
     public ResponseEntity getAllOpportunities() {
@@ -45,4 +49,42 @@ public class OpportunityController {
         opportunityService.deleteOpportunity(opportunityId);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity deleted successfully"));
     }
+
+    @GetMapping("/sorted-by-capacity/{organizationId}")
+    public ResponseEntity getOpportunitiesSorted(@PathVariable Integer organizationId) {
+        List<Opportunity> sorted = opportunityService.getOpportunitiesSortedByCapacity(organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(sorted);
+    }
+
+    @GetMapping("/count/open/{organizationId}")
+    public ResponseEntity getOpenCount(@PathVariable Integer organizationId) {
+        return ResponseEntity.status(HttpStatus.OK).body(opportunityService.countByStatus(organizationId, "Open"));
+    }
+
+    @GetMapping("/count/pending/{organizationId}")
+    public ResponseEntity getPendingCount(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(opportunityService.countByStatus(organizationId, "Pending"));
+    }
+
+    @GetMapping("/count/rejected/{organizationId}")
+    public ResponseEntity getRejectedCount(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(opportunityService.countByStatus(organizationId, "Rejected"));
+    }
+
+    @GetMapping("/count/closed/{organizationId}")
+    public ResponseEntity getClosedCount(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(opportunityService.countByStatus(organizationId, "Closed"));
+    }
+
+    @GetMapping("/count/total/{organizationId}")
+    public ResponseEntity getTotalCount(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(opportunityService.countTotalOpportunities(organizationId));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getOpportunitiesByStatus(@PathVariable String status) {
+        List<Opportunity> opportunities = opportunityService.getOpportunitiesByStatus(status);
+        return ResponseEntity.status(HttpStatus.OK).body(opportunities);
+    }
+
 }

@@ -17,6 +17,9 @@ public class OpportunityService {
 
     private final OpportunityRepository opportunityRepository;
     private final OrganizationRepository organizationRepository;
+    private final MailSender mailSender;
+
+
 
     public List<Opportunity> findAllOpportunities() {
         return opportunityRepository.findAll();
@@ -36,7 +39,7 @@ public class OpportunityService {
         opportunity.setTitle(opportunity.getTitle());
         opportunity.setDescription(opportunity.getDescription());
         opportunity.setLocation(opportunity.getLocation());
-        opportunity.setStatus("Pending");
+        opportunity.setStatus("pending");
         opportunity.setTypeOpportunity(opportunity.getTypeOpportunity());
         opportunity.setHours(opportunity.getHours());
         opportunity.setGender(opportunity.getGender());
@@ -60,7 +63,7 @@ public class OpportunityService {
         }
 
         if (!oldOpportunity.getOrganization().getId().equals(oldOrganization.getId())) {
-            throw new ApiException("Organization cannot be update this opportunity");
+            throw new ApiException("Organization cannot update this opportunity");
         }
 
 
@@ -74,6 +77,8 @@ public class OpportunityService {
         oldOpportunity.setStudentCapacity(updatedOpportunity.getStudentCapacity());
         oldOpportunity.setLocation(updatedOpportunity.getLocation());
 
+        oldOpportunity.setStatus("pending");
+
         opportunityRepository.save(oldOpportunity);
     }
 
@@ -86,4 +91,39 @@ public class OpportunityService {
 
         opportunityRepository.delete(opportunity);
     }
+
+    //4
+    public List<Opportunity> getOpportunitiesSortedByCapacity(Integer organizationId) {
+        return opportunityRepository.findByOrganizationIdOrderByStudentCapacityDesc(organizationId);
+    }
+
+
+    //21
+    public int countByStatus(Integer organizationId, String status) {
+        List<Opportunity> opportunities = opportunityRepository.findOpportunitiesByOrganizationId(organizationId);
+        int count = 0;
+
+        for (Opportunity o : opportunities) {
+            if (o.getStatus() == status) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    //21
+    public int countTotalOpportunities(Integer organizationId) {
+        List<Opportunity> opportunities = opportunityRepository.findOpportunitiesByOrganizationId(organizationId);
+        return opportunities.size();
+    }
+
+
+    //25
+    public List<Opportunity> getOpportunitiesByStatus(String status) {
+        return opportunityRepository.findOpportunitiesByStatus(status);
+    }
+
+
+
 }
