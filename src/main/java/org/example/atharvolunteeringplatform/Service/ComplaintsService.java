@@ -46,7 +46,7 @@ public class ComplaintsService {
 
 
     //14
-    public List<Complaints> getComplaintsByDateRange(LocalDate from, LocalDate to) {
+    public List<Complaint> getComplaintsByDateRange(LocalDate from, LocalDate to) {
         return complaintsRepository.findComplaintsByCreateAtDateBetween(from, to);
     }
 }

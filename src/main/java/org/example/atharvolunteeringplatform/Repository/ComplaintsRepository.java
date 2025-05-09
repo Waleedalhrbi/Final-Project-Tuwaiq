@@ -13,7 +13,7 @@ public interface ComplaintsRepository extends JpaRepository<Complaint, Integer> 
 
     Complaint findComplaintsById(Integer id);
 
-    List<Complaints> findComplaintsByCreateAtDateBetween(LocalDate from, LocalDate to);
+    List<Complaint> findComplaintsByCreateAtDateBetween(LocalDate from, LocalDate to);
 
 
 }

@@ -7,6 +7,7 @@ import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
+import org.springframework.mail.MailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
