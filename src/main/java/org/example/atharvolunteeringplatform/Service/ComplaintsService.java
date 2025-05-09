@@ -5,6 +5,7 @@ import org.example.atharvolunteeringplatform.Model.Complaint;
 import org.example.atharvolunteeringplatform.Repository.ComplaintsRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,5 +42,11 @@ public class ComplaintsService {
         if(complaint ==null) {
             throw new ApiException("Complaint not found");}
         complaintsRepository.delete(complaint);
+    }
+
+
+    //14
+    public List<Complaint> getComplaintsByDateRange(LocalDate from, LocalDate to) {
+        return complaintsRepository.findComplaintsByCreateAtDateBetween(from, to);
     }
 }

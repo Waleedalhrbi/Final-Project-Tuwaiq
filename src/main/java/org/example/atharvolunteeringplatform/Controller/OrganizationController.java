@@ -29,16 +29,34 @@ public class OrganizationController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity updateOrganization(
-            /*@AuthenticationPrincipal*/ MyUser myUser,
-                                         @RequestBody @Valid OrganizationDTO organizationDTO) {
+    public ResponseEntity updateOrganization(/*@AuthenticationPrincipal*/ MyUser myUser, @RequestBody @Valid OrganizationDTO organizationDTO) {
         organizationService.updateOrganization(myUser.getId(), organizationDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Organization updated successfully"));
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity deleteOrganization(/*@AuthenticationPrincipal*/ MyUser myUser) {
-        organizationService.deleteOrganization(myUser.getId());
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteOrganization( @PathVariable Integer id) {
+        organizationService.deleteOrganization(id);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Organization deleted successfully"));
     }
+
+    @GetMapping("/count/volunteers/{organizationId}")
+    public ResponseEntity getVolunteersCount(@PathVariable Integer organizationId) {
+        int count = organizationService.volunteersCount(organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(count);
+    }
+
+    @GetMapping("/count/opportunities/{organizationId}")
+    public ResponseEntity getOpportunitiesCount(@PathVariable Integer organizationId) {
+        int count = organizationService.opportunitiesCount(organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(count);
+    }
+
+    @GetMapping("/total-hours/{organizationId}")
+    public ResponseEntity getTotalVolunteeringHours(@PathVariable Integer organizationId) {
+        int totalHours = organizationService.getTotalVolunteeringHours(organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(totalHours);
+    }
+
+
 }
