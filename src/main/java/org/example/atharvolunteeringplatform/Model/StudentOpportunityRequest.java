@@ -48,4 +48,8 @@ public class StudentOpportunityRequest {
     @JoinColumn(name = "student_id", referencedColumnName = "id")
     @JsonIgnore
     private Student student;
+
+    //****
+    @ManyToOne
+    private Opportunity opportunity;
 }
