@@ -18,7 +18,7 @@ public class OpportunityService {
 
     private final OpportunityRepository opportunityRepository;
     private final OrganizationRepository organizationRepository;
-    private final MailSender mailSender;
+//    private final MailSender mailSender;
 
 
 

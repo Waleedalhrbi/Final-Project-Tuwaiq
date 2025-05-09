@@ -1,6 +1,9 @@
 package org.example.atharvolunteeringplatform.Repository;
 
+<<<<<<< HEAD
+=======
 import org.example.atharvolunteeringplatform.Model.Opportunity;
+>>>>>>> b781651c389f9168a607a989830639cf552ef553
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +24,9 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Completed'")
     List<StudentOpportunityRequest> findCompletedByOrganizationId(Integer organizationId);
 
+
+    List<StudentOpportunityRequest> findAllByStudent(Student student);
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.student.id = ?1 AND LOWER(r.status) = 'completed'")
+    List<StudentOpportunityRequest> findCompletedOpportunitiesByStudentId(Integer studentId);
 }

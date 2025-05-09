@@ -6,6 +6,7 @@ package org.example.atharvolunteeringplatform.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
+import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.School;
 import org.example.atharvolunteeringplatform.Service.SchoolService;
 import org.springframework.http.ResponseEntity;
@@ -44,4 +45,12 @@ public class SchoolController {
         schoolService.deleteSchool(id);
         return ResponseEntity.ok("School deleted successfully");
     }
+
+    @PutMapping("/opportunity-request/{requestId}/status/{status}")
+    public ResponseEntity updateRequestStatus(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable Integer requestId, @PathVariable String status) {
+
+        schoolService.updateRequestStatus(user.getId(), requestId, status);
+        return ResponseEntity.ok("Request status updated to: " + status);
+    }
+
 }
