@@ -123,4 +123,15 @@ public class BadgeService {
     }
 
 
+
+    //17
+    public Badge getBadgeDetails(Integer badgeId) {
+        Badge badge = badgeRepository.findBadgeById(badgeId);
+        if (badge == null) {
+            throw new ApiException("Badge not found");
+        }
+        return badge;
+    }
+
+
 }

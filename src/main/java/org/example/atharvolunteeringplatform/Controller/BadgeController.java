@@ -36,6 +36,12 @@ public class BadgeController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Badge deleted successfully"));
     }
 
+    @GetMapping("/badgeDetails/{badgeId}")
+    public ResponseEntity<?> getBadgeDetails(@PathVariable Integer badgeId) {
+        Badge badge = badgeService.getBadgeDetails(badgeId);
+        return ResponseEntity.status(HttpStatus.OK).body(badge);
+    }
+
 
 
 }

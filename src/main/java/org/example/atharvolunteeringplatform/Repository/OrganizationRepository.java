@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface OrganizationRepository extends JpaRepository<Organization, Integer> {
 
     Organization findOrganizationById(Integer id);
+
+
 }

@@ -33,7 +33,7 @@ public class StudentOpportunityRequest {
     private String organization_status;
 
 
-    @Pattern(regexp = "^(pending|rejected|progress|complete|incomplete)$", message = "Status must be one of: pending, rejected, progress, complete, incomplete")
+    @Pattern(regexp = "^(pending|rejected|progress|completed|incomplete)$", message = "Status must be one of: pending, rejected, progress, complete, incomplete")
     @Column(columnDefinition = "varchar(20)")
     private String status;
 
@@ -48,4 +48,8 @@ public class StudentOpportunityRequest {
     @JoinColumn(name = "student_id", referencedColumnName = "id")
     @JsonIgnore
     private Student student;
+
+    @ManyToOne
+    @JsonIgnore
+    private Opportunity opportunity;
 }

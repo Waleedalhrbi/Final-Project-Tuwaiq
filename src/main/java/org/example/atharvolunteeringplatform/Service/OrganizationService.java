@@ -4,12 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.OrganizationDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
+import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.Organization;
+import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
+import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
+import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,6 +23,8 @@ import java.util.List;
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final MyUserRepository userRepository;
+    private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
+    private final OpportunityRepository opportunityRepository;
 
 
     public List<Organization> findAll() {
@@ -31,11 +38,13 @@ public class OrganizationService {
         user.setEmail(organizationDTO.getEmail());
         user.setPassword(organizationDTO.getPassword());
         user.setPhone_number(organizationDTO.getPhoneNumber());
-        user.setRole("ORGANIZATION");
+        user.setRole("organization");
         user.setCreated_at(LocalDateTime.now());
 
         Organization organization = new Organization();
 
+        organization.setLicense(organizationDTO.getLicense());
+        organization.setLocation(organizationDTO.getLocation());
         organization.setStatus("InActive");
         organization.setUser(user);
         user.setOrganization(organization);
@@ -71,6 +80,58 @@ public class OrganizationService {
         }
         organizationRepository.delete(organization);
     }
+
+    //19 volunteersCount
+    public int volunteersCount(Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+         List<StudentOpportunityRequest> completedByOrganization = studentOpportunityRequestRepository.findCompletedByOrganizationId(organizationId);
+
+        int volunteersCount = 0;
+        for (int i = 0; i < completedByOrganization.size(); i++) {
+            volunteersCount++;
+        }
+
+        return volunteersCount;
+    }
+
+    //59
+    public int opportunitiesCount(Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+        List<Opportunity> openOpportunities = opportunityRepository.findOpenOpportunitiesByOrganizationId(organizationId);
+        int opportunitiesCount = 0;
+        for (int i = 0; i < openOpportunities.size(); i++) {
+            opportunitiesCount++;
+        }
+        return opportunitiesCount;
+    }
+
+    //60
+    public int getTotalVolunteeringHours(Integer organizationId) {
+        List<StudentOpportunityRequest> requests = studentOpportunityRequestRepository.findCompletedByOrganizationId(organizationId);
+
+        int totalHours = 0;
+        for (StudentOpportunityRequest request : requests) {
+            totalHours += request.getOpportunity().getHours();
+        }
+        return totalHours;
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
