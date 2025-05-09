@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Setter
 @Getter
@@ -29,7 +31,7 @@ public class School {
 
     @Column(nullable = false)
     @NotEmpty(message = "gender cannot be Empty")
-    @Pattern(regexp = "Male|female")
+    @Pattern(regexp = "^(Male|female)$")
     private String gender;
 
     @Column(nullable = false)
@@ -39,14 +41,18 @@ public class School {
     @Column(nullable = false)
     @NotEmpty(message = "supervisor Name cannot be Empty")
     private String supervisorName;
-//
-//    @OneToOne
-//    private User user;
-//
-//    @OneToMany
-//    private Set<Student>students;
-//
-//    @OneToMany
-//    private Set<Review>reviews;
+
+    @Pattern(regexp = "^(Active|Inactive|Pending)$")
+    private String status;
+
+    @OneToOne
+    private MyUser myUser;
+
+
+    @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
+    private Set<Student> students;
+
+    @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
+    private Set<Review> reviews;
 
 }

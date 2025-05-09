@@ -1,6 +1,7 @@
 package org.example.atharvolunteeringplatform.DTO;
 
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -10,17 +11,28 @@ import lombok.Setter;
 @Getter
 public class SchoolDTO {
 
-
+//User
     @Column(nullable = false)
     @NotEmpty(message = "Name cannot be Empty")
     private String name;
 
+    @NotEmpty(message = "Please enter an email")
+    @Email(message = "Invalid email format")
+    @Column(columnDefinition = "varchar(100) not null unique")
     private String email;
 
+
+    @NotEmpty(message = "Please enter a phone number")
+    @Pattern(regexp = "^05\\d{8}$", message = "Phone number must start with 05 and be 10 digits long")
+    @Column(columnDefinition = "varchar(10) not null unique")
     private String phoneNumber;
 
+    @NotEmpty(message = "Please enter a password")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{9,}$", message = "Password must be at least 9 characters and include letters and numbers")
+    @Column(columnDefinition = "varchar(255) not null")
     private String password;
 
+    //school
     @Column(nullable = false)
     @NotEmpty(message = "Region cannot be Empty")
     private String region;
@@ -37,6 +49,9 @@ public class SchoolDTO {
     @Column(nullable = false)
     @NotEmpty(message = "supervisor Name cannot be Empty")
     private String supervisorName;
+
+    @Pattern(regexp = "^(Active|Inactive|Pending)$")
+    private String status;
 
 
 }

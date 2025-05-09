@@ -34,13 +34,13 @@ public class SchoolController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateSchool(@PathVariable Integer id, @RequestBody @Valid SchoolDTO schoolDTO) {
+    public ResponseEntity<String> updateSchool(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer id, @RequestBody @Valid SchoolDTO schoolDTO) {
         schoolService.updateSchool(id, schoolDTO);
         return ResponseEntity.ok("School updated successfully");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteSchool(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteSchool(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer id) {
         schoolService.deleteSchool(id);
         return ResponseEntity.ok("School deleted successfully");
     }
