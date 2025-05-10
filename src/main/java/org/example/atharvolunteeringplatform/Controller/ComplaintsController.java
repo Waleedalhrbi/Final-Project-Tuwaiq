@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -43,11 +44,12 @@ public class ComplaintsController {
     }
 
 
-    @GetMapping("/by-date/{from}/{to}")
-    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDate from, @PathVariable LocalDate to) {
-        List<Complaints> complaints = complaintsService.getComplaintsByDateRange(from, to);
+    @GetMapping("/by-date/{from}/{to}/{studentId}")
+    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to, @PathVariable Integer studentId) {
+        List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(studentId, from, to);
         return ResponseEntity.status(HttpStatus.OK).body(complaints);
     }
+
 
 
 

@@ -8,6 +8,7 @@ import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class OpportunityService {
             throw new ApiException("Organization not found");
         }
 
-        if (organization.getStatus() == "InActive") {
+        if (organization.getStatus().equalsIgnoreCase("InActive")) {
             throw new ApiException("Organization status is InActive");
         }
 
@@ -105,7 +106,7 @@ public class OpportunityService {
         int count = 0;
 
         for (Opportunity o : opportunities) {
-            if (o.getStatus() == status) {
+            if (o.getStatus().equalsIgnoreCase(status)) {
                 count++;
             }
         }
@@ -125,6 +126,86 @@ public class OpportunityService {
         return opportunityRepository.findOpportunitiesByStatus(status);
     }
 
+    // 27
+    public void acceptOpportunity(Integer opportunityId) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+
+        opportunity.setStatus("accepted");
+        opportunityRepository.save(opportunity);
+
+        String to = opportunity.getOrganization().getUser().getEmail();
+        String subject = "تم قبول الفرصة التطوعية";
+        String body = "تمت الموافقة على الفرصة التطوعية بعنوان: " + opportunity.getTitle();
+        sendDecisionEmail(to, subject, body);
+    }
+
+    // 28
+    public void acceptOpportunityEdit(Integer opportunityId) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+
+        opportunity.setStatus("accepted");
+        opportunityRepository.save(opportunity);
+
+        String to = opportunity.getOrganization().getUser().getEmail();
+        String subject = "تم قبول طلب تعديل الفرصة";
+        String body = "تمت الموافقة على التعديلات المقترحة للفرصة التطوعية: " + opportunity.getTitle();
+        sendDecisionEmail(to, subject, body);
+    }
+
+    // 61
+    public void rejectOpportunity(Integer opportunityId) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+
+        opportunity.setStatus("rejected");
+        opportunityRepository.save(opportunity);
+
+        String to = opportunity.getOrganization().getUser().getEmail();
+        String subject = "تم رفض الفرصة التطوعية";
+        String body = "نأسف، تم رفض الفرصة التطوعية بعنوان: " + opportunity.getTitle();
+        sendDecisionEmail(to, subject, body);
+    }
+
+    // 62
+    public void rejectOpportunityEdit(Integer opportunityId) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+
+        opportunity.setStatus("rejected");
+        opportunityRepository.save(opportunity);
+
+        String to = opportunity.getOrganization().getUser().getEmail();
+        String subject = "تم رفض طلب تعديل الفرصة";
+        String body = "نأسف، تم رفض التعديلات المقترحة للفرصة التطوعية: " + opportunity.getTitle();
+        sendDecisionEmail(to, subject, body);
+    }
+
+    // 63
+    public void sendDecisionEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+
+
+
 
 
 }
+
+
+

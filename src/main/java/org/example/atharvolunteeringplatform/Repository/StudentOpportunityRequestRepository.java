@@ -16,4 +16,16 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Completed'")
     List<StudentOpportunityRequest> findCompletedByOrganizationId(Integer organizationId);
 
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Pending'")
+    List<StudentOpportunityRequest> findPendingRequestsByOrganizationId(Integer organizationId);
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status IN ('accepted', 'rejected')")
+    List<StudentOpportunityRequest> findHistoryByOrganizationId(Integer organizationId);
+
+
+    List<StudentOpportunityRequest> findAllByStudent_Id(Integer studentId);
+
+
+
+
 }

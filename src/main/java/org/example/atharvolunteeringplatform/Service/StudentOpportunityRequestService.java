@@ -2,8 +2,10 @@ package org.example.atharvolunteeringplatform.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
+import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
+import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class StudentOpportunityRequestService {
 
     private final StudentRepository studentRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
-//    private final OpportunityRepository opportunityrepository;
+    private final OpportunityRepository opportunityrepository;
 
 
 
@@ -35,14 +37,18 @@ public class StudentOpportunityRequestService {
         }
 
 
-//        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
-//        if (opportunity == null) {
-//            throw new ApiException("Opportunity not found");
-//        }
+        Opportunity opportunity = opportunityrepository.findOpportunityById(opportunityId);
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
 
-        if (student.getStatus() == "Inactive"){
+        if (student.getStatus().equalsIgnoreCase("Inactive")){
             throw new ApiException("Student account not active");
         }
+
+//        if (!student.getGender().equalsIgnoreCase(opportunity.getGender())) {
+//            throw new ApiException("Student not allowed to apply to opportunity due to gender");
+//        }
 
 
         studentOpportunityRequest.setSupervisor_status("pending");
@@ -51,7 +57,7 @@ public class StudentOpportunityRequestService {
 
 
         studentOpportunityRequest.setStudent(student);
-//        studentOpportunityRequest.setOpportunity(opportunity);
+        studentOpportunityRequest.setOpportunity(opportunity);
         studentOpportunityRequest.setApplied_at(LocalDateTime.now());
 
 
@@ -70,4 +76,5 @@ public class StudentOpportunityRequestService {
 
         studentOpportunityRequestRepository.delete(existingRequest);
     }
+
 }

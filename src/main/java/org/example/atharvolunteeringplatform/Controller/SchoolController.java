@@ -7,7 +7,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
 import org.example.atharvolunteeringplatform.Model.School;
+import org.example.atharvolunteeringplatform.Model.Student;
+import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
+import org.example.atharvolunteeringplatform.Service.OrganizationService;
 import org.example.atharvolunteeringplatform.Service.SchoolService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,4 +48,18 @@ public class SchoolController {
         schoolService.deleteSchool(id);
         return ResponseEntity.ok("School deleted successfully");
     }
+
+    @GetMapping("/students/non-volunteers/{gradeLevel}/{schoolId}")
+    public ResponseEntity<?> getNonVolunteers(/*@AuthenticationPrincipal MyUser myUser*/ @PathVariable String gradeLevel, @PathVariable Integer schoolId) {
+        List<Student> students = schoolService.getNonVolunteersByGradeForSchool(gradeLevel, schoolId);
+        return ResponseEntity.status(HttpStatus.OK).body(students);
+    }
+
+    @GetMapping("/student/{studentId}/school/{schoolId}/opportunities")
+    public ResponseEntity<?> getAllRequestsForStudent(@PathVariable Integer studentId, @PathVariable Integer schoolId) {
+        List<StudentOpportunityRequest> requests = schoolService.getAllRequestsForStudent(studentId, schoolId);
+        return ResponseEntity.status(HttpStatus.OK).body(requests);
+    }
+
+
 }

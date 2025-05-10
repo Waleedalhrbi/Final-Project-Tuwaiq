@@ -1,5 +1,7 @@
 package org.example.atharvolunteeringplatform.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
@@ -18,17 +20,45 @@ import org.springframework.web.multipart.MultipartFile;
 public class BadgeController {
     private final BadgeService badgeService;
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addBadge(@RequestPart @Valid Badge badge, @RequestPart MultipartFile image) {
+    @GetMapping("/get-all")
+    public ResponseEntity<?> getAllBadges() {
+        badgeService.findBadges();
+        return ResponseEntity.status(HttpStatus.OK).body(badgeService.findBadges());
+    }
+
+    @PostMapping(value = "/add", consumes = "multipart/form-data")
+    public ResponseEntity<?> addBadge(@RequestPart("badge") String badgeJson, @RequestPart("image") MultipartFile image) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Badge badge;
+        try {
+            badge = objectMapper.readValue(badgeJson, Badge.class);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid JSON format in 'badge'");
+        }
+
         badgeService.createBadge(badge, image);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Badge created successfully"));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateBadge(@PathVariable Integer id, @RequestPart @Valid Badge badge, @RequestPart(required = false) MultipartFile image) {
+
+    @PutMapping(value = "/update/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<?> updateBadge(
+            @PathVariable Integer id,
+            @RequestPart("badge") String badgeJson,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Badge badge;
+        try {
+            badge = objectMapper.readValue(badgeJson, Badge.class);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().body("Invalid badge data");
+        }
+
         badgeService.updateBadge(id, badge, image);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Badge updated successfully"));
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteBadge(@PathVariable Integer id) {
