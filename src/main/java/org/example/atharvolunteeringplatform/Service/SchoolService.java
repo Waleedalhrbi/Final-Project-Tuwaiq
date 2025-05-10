@@ -1,11 +1,5 @@
 package org.example.atharvolunteeringplatform.Service;
-//
-//import com.example.final_project.API.ApiException;
-//import com.example.final_project.DTO.SchoolDTO;
-//import com.example.final_project.Model.MyUser;
-//import com.example.final_project.Model.School;
-//import com.example.final_project.Repository.MyUserRepository;
-//import com.example.final_project.Repository.SchoolRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
@@ -16,6 +10,9 @@ import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
+ 
+import org.example.atharvolunteeringplatform.Repository.StudentRepository;
+ 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,7 +25,11 @@ public class SchoolService {
 
     private final SchoolRepository schoolRepository;
     private final MyUserRepository myUserRepository;
+
+    private final StudentRepository studentRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
+
+
     public List<School> getAllSchool() {
         return schoolRepository.findAll();
     }
@@ -50,11 +51,13 @@ public class SchoolService {
 
 
         School school = new School();
+        school.setName(schoolDTO.getName());
         school.setCity(schoolDTO.getCity());
         school.setRegion(schoolDTO.getRegion());
         school.setSupervisorName(schoolDTO.getSupervisorName());
          school.setGender(schoolDTO.getGender());
          school.setStatus("Pending");
+         school.setMyUser(myUser);
 
         schoolRepository.save(school);
     }
@@ -108,6 +111,33 @@ public class SchoolService {
 
         myUserRepository.delete(oldUser);
     }
+
+    public List<StudentOpportunityRequest> getAllRequestsForStudent(Integer studentId, Integer schoolId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+
+        if (!student.getSchool().getId().equals(schoolId)) {
+            throw new ApiException("Unauthorized access");
+        }
+
+        return studentOpportunityRequestRepository.findAllByStudent_Id(studentId);
+    }
+
+
+
+    //42
+    public List<Student> getNonVolunteersByGradeForSchool(String gradeLevel, Integer schoolId) {
+        School school = schoolRepository.findSchoolById(schoolId);
+        if (school == null) {
+            throw new ApiException("school not found");
+        }
+        return studentRepository.findNonVolunteersStudents(gradeLevel, schoolId);
+    }
+
+
+
 
 
     //40

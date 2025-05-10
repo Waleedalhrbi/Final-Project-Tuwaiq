@@ -42,9 +42,13 @@ public class StudentOpportunityRequestService {
             throw new ApiException("Opportunity not found");
         }
 
-        if (student.getStatus() == "Inactive"){
+        if (student.getStatus().equalsIgnoreCase("Inactive")){
             throw new ApiException("Student account not active");
         }
+
+//        if (!student.getGender().equalsIgnoreCase(opportunity.getGender())) {
+//            throw new ApiException("Student not allowed to apply to opportunity due to gender");
+//        }
 
 
         studentOpportunityRequest.setSupervisor_status("pending");
@@ -74,6 +78,7 @@ public class StudentOpportunityRequestService {
     }
 
 
+
     //15
     public List<StudentOpportunityRequest> getCompletedOpportunitiesByStudent(Integer studentId) {
         Student student = studentRepository.findStudentById(studentId);
@@ -84,4 +89,5 @@ public class StudentOpportunityRequestService {
         return studentOpportunityRequestRepository.findCompletedOpportunitiesByStudentId(studentId);
     }
 
+ 
 }
