@@ -49,7 +49,7 @@ public class ComplaintsService {
  
     public List<Complaint> getComplaintsByStudentAndDate(Integer studentId, LocalDateTime from, LocalDateTime to) {
         return complaintsRepository.findByStudentIdAndCreateAtBetween(studentId, from, to);
- 
+    }
     public List<Complaint> getComplaintsByDateRange(LocalDateTime  from, LocalDateTime  to) {
         return complaintsRepository.findComplaintsByCreateAtBetweenDates(from, to);
     }

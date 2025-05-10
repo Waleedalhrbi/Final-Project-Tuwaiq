@@ -12,7 +12,9 @@ import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
  
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
- 
+
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,6 +30,7 @@ public class SchoolService {
 
     private final StudentRepository studentRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
+    private final JavaMailSender mailSender;
 
 
     public List<School> getAllSchool() {
@@ -171,5 +174,90 @@ public class SchoolService {
         request.setStatus(status.toLowerCase());
         studentOpportunityRequestRepository.save(request);
     }
+
+    //47
+    public List<StudentOpportunityRequest> getStudentRequestsBySchoolUser(Integer userId) {
+
+        School school = schoolRepository.findSchoolById(userId);
+
+        if (school == null) {
+            throw new ApiException("School not found");
+        }
+
+
+        return studentOpportunityRequestRepository.findAllBySchoolId(school.getId());
+    }
+
+
+    //53
+
+    public void sendVolunteerDecisionEmail(String to, String status, String opportunityTitle, String organizationName, String location, LocalDate startDate, LocalDate endDate) {
+        String subject;
+        String body;
+
+        if (status.equalsIgnoreCase("accepted")) {
+            subject = "تم قبول طلب التطوع الخاص بك";
+            body = "نود إبلاغك بأنه تم قبول طلبك للتطوع في الفرصة التالية:\n\n" +
+                    "عنوان الفرصة: " + opportunityTitle + "\n" +
+                    "الجهة المقدمة: " + organizationName + "\n" +
+                    "الموقع: " + location + "\n" +
+                    "تاريخ البداية: " + startDate + "\n" +
+                    "تاريخ الانتهاء: " + endDate + "\n\n" +
+                    "نتمنى لك تجربة تطوعية مثرية ومفيدة.\n\n" +
+                    "مع تحيات فريق أثر.";
+        } else {
+            subject = "تم رفض طلب التطوع الخاص بك";
+            body = "نأسف لإبلاغك بأنه لم يتم قبول طلبك للتطوع في الفرصة: " + opportunityTitle + ".\n" +
+                    "نتمنى لك التوفيق في فرص أخرى قادمة.\n\n" +
+                    "مع تحيات فريق أثر.";
+        }
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+    //48
+    public void updateOpportunityRequestStatus(Integer userId, Integer requestId, String status) {
+
+        School school = schoolRepository.findSchoolById(userId);
+        if (school == null) throw new ApiException("School not found");
+
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        if (request == null) throw new ApiException("Request not found");
+
+        Student student = request.getStudent();
+        if (student == null || !student.getSchool().getId().equals(school.getId())) {
+            throw new ApiException("This student does not belong to your school");
+        }
+
+        if (request.getOpportunity().getEndDate().isBefore(LocalDate.now())) {
+            throw new ApiException("Cannot update status. The opportunity has already ended");
+        }
+
+        if (!status.equalsIgnoreCase("accepted") && !status.equalsIgnoreCase("rejected")) {
+            throw new ApiException("Invalid status. Must be 'accepted' or 'rejected'");
+        }
+
+        request.setSupervisor_status(status.toLowerCase());
+        studentOpportunityRequestRepository.save(request);
+
+
+        String email = student.getUserStudent().getEmail();
+        sendVolunteerDecisionEmail(
+                email,
+                status,
+                request.getOpportunity().getTitle(),
+                request.getOpportunity().getOrganization().getName(),
+                request.getOpportunity().getLocation(),
+                request.getOpportunity().getStartDate(),
+                request.getOpportunity().getEndDate()
+        );
+    }
+
+
+
 
 }

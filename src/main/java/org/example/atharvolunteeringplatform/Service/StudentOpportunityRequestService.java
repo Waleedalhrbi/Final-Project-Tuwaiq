@@ -46,9 +46,9 @@ public class StudentOpportunityRequestService {
             throw new ApiException("Student account not active");
         }
 
-//        if (!student.getGender().equalsIgnoreCase(opportunity.getGender())) {
-//            throw new ApiException("Student not allowed to apply to opportunity due to gender");
-//        }
+        if (!student.getGender().equalsIgnoreCase(opportunity.getGender())) {
+            throw new ApiException("Student not allowed to apply to opportunity due to gender");
+        }
 
 
         studentOpportunityRequest.setSupervisor_status("pending");

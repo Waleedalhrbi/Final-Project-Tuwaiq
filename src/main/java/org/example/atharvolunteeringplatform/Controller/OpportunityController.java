@@ -90,26 +90,35 @@ public class OpportunityController {
     @PostMapping("/accept/{id}")
     public ResponseEntity<?> acceptOpportunity(@PathVariable Integer id) {
         opportunityService.acceptOpportunity(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Opportunity accepted and email sent.");
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity accepted and email sent."));
     }
 
     @PostMapping("/accept-edit/{id}")
     public ResponseEntity<?> acceptOpportunityEdit(@PathVariable Integer id) {
         opportunityService.acceptOpportunityEdit(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Opportunity edit accepted and email sent.");
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity edit accepted and email sent."));
     }
 
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectOpportunity(@PathVariable Integer id) {
         opportunityService.rejectOpportunity(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Opportunity rejected and email sent.");
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity rejected and email sent."));
     }
 
     @PostMapping("/reject-edit/{id}")
     public ResponseEntity<?> rejectOpportunityEdit(@PathVariable Integer id) {
         opportunityService.rejectOpportunityEdit(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Opportunity edit rejected and email sent.");
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity edit rejected and email sent."));
     }
+
+    @PutMapping("/admin/change-opportunity-status/{opportunityId}/{newStatus}")
+    public ResponseEntity changeOpportunityStatus(
+            @PathVariable Integer opportunityId,
+            @PathVariable String newStatus) {
+        opportunityService.changeOpportunityStatus(opportunityId, newStatus);
+        return ResponseEntity.ok(new ApiResponse("Status updated successfully"));
+    }
+
 }
 
 
