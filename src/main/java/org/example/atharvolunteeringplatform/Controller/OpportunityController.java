@@ -57,22 +57,27 @@ public class OpportunityController {
 
     @GetMapping("/count/pending/{organizationId}")
     public ResponseEntity getPendingCount(@PathVariable Integer organizationId) {
+
         return ResponseEntity.status(HttpStatus.OK).body(opportunityService.countByStatus(organizationId, "pending"));
     }
 
     @GetMapping("/count/rejected/{organizationId}")
     public ResponseEntity getRejectedCount(@PathVariable Integer organizationId) {
+
         return ResponseEntity.status(HttpStatus.OK).body(opportunityService.countByStatus(organizationId, "rejected"));
     }
 
     @GetMapping("/count/closed/{organizationId}")
     public ResponseEntity getClosedCount(@PathVariable Integer organizationId) {
+
         return ResponseEntity.status(HttpStatus.OK).body(opportunityService.countByStatus(organizationId, "closed"));
     }
 
     @GetMapping("/count/total/{organizationId}")
     public ResponseEntity getTotalCount(@PathVariable Integer organizationId) {
+
         return ResponseEntity.status(HttpStatus.OK).body(opportunityService.countTotalOpportunities(organizationId));
+
     }
 
     @GetMapping("/status/{status}")
@@ -80,6 +85,7 @@ public class OpportunityController {
         List<Opportunity> opportunities = opportunityService.getOpportunitiesByStatus(status);
         return ResponseEntity.status(HttpStatus.OK).body(opportunities);
     }
+
 
     @PostMapping("/accept/{id}")
     public ResponseEntity<?> acceptOpportunity(@PathVariable Integer id) {

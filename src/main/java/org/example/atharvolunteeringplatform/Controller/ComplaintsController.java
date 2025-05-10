@@ -3,6 +3,7 @@ package org.example.atharvolunteeringplatform.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Model.Complaint;
+import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Service.ComplaintsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,7 @@ public class ComplaintsController {
     }
 
 
+
     @GetMapping("/by-date/{from}/{to}/{studentId}")
     public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to, @PathVariable Integer studentId) {
         List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(studentId, from, to);
@@ -52,6 +54,11 @@ public class ComplaintsController {
 
 
 
-
+    @GetMapping("/my-complaints/{status}")
+    public ResponseEntity getMyComplaintsByStatus(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable String status) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                complaintsService.getMyComplaintsByStatus(user.getId(), status)
+        );
+    }
 
 }

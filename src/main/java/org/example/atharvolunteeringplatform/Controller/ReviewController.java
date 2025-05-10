@@ -2,8 +2,11 @@ package org.example.atharvolunteeringplatform.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Model.MyUser;
+import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Model.Review;
 import org.example.atharvolunteeringplatform.Service.ReviewService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +25,8 @@ public class ReviewController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addReview(@RequestBody @Valid Review review) {
-        reviewService.addReview(review);
+    public ResponseEntity addReview(@RequestParam Integer opportunityId, @RequestParam Integer studentId,/*@AuthenticationPrincipal*/ @RequestParam Integer supervisorId,@RequestBody @Valid Review review) {
+        reviewService.addReview(opportunityId,studentId,review,supervisorId);
         return ResponseEntity.ok("Review added successfully");
     }
 
@@ -38,4 +41,27 @@ public class ReviewController {
 //        reviewService.deleteReview(id);
 //        return ResponseEntity.ok("Review deleted successfully");
 //    }
+
+
+    @GetMapping("/organization/average-rating")
+    public ResponseEntity getOrganizationAverageRating(/*@AuthenticationPrincipal*/ Organization organization) {
+        return ResponseEntity.ok(reviewService.getAverageRating(organization));
+    }
+
+    @GetMapping("/organization/review-count")
+    public ResponseEntity getOrganizationReviewCount(/*@AuthenticationPrincipal*/ Organization organization) {
+        return ResponseEntity.ok(reviewService.getReviewCount(organization));
+    }
+
+    @GetMapping("/opportunity/{opportunityId}/average-rating")
+    public ResponseEntity getOpportunityAverageRating(@PathVariable Integer opportunityId, /*@AuthenticationPrincipal*/ Organization organization) {
+        return ResponseEntity.ok(reviewService.getOpportunityAverageRating(opportunityId, organization));
+    }
+
+    @GetMapping("/opportunity/{opportunityId}/review-count")
+    public ResponseEntity getOpportunityReviewCount(@PathVariable Integer opportunityId, /*@AuthenticationPrincipal*/ Organization organization) {
+        return ResponseEntity.ok(reviewService.getReviewCountForOpportunity(opportunityId, organization));
+    }
+
+
 }

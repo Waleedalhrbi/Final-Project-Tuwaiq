@@ -6,6 +6,7 @@ package org.example.atharvolunteeringplatform.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
+import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.School;
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
@@ -49,6 +50,7 @@ public class SchoolController {
         return ResponseEntity.ok("School deleted successfully");
     }
 
+ 
     @GetMapping("/students/non-volunteers/{gradeLevel}/{schoolId}")
     public ResponseEntity<?> getNonVolunteers(/*@AuthenticationPrincipal MyUser myUser*/ @PathVariable String gradeLevel, @PathVariable Integer schoolId) {
         List<Student> students = schoolService.getNonVolunteersByGradeForSchool(gradeLevel, schoolId);
@@ -62,4 +64,13 @@ public class SchoolController {
     }
 
 
+ 
+    @PutMapping("/opportunity-request/{requestId}/status/{status}")
+    public ResponseEntity updateRequestStatus(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable Integer requestId, @PathVariable String status) {
+
+        schoolService.updateRequestStatus(user.getId(), requestId, status);
+        return ResponseEntity.ok("Request status updated to: " + status);
+    }
+
+ 
 }

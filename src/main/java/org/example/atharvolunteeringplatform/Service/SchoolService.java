@@ -10,9 +10,12 @@ import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
+ 
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
+ 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +25,7 @@ public class SchoolService {
 
     private final SchoolRepository schoolRepository;
     private final MyUserRepository myUserRepository;
+
     private final StudentRepository studentRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
 
@@ -63,7 +67,12 @@ public class SchoolService {
         if (oldUser == null) {
             throw new ApiException("School not found");
         }
-        //اذاء السكول حالتها مفعله
+
+        // التحقق من أن حالة المدرسة مفعلة
+        if (!"Active".equalsIgnoreCase(schoolDTO.getStatus())) {
+            throw new ApiException("School must be in 'Active' status to allow update");
+        }
+
 
         School school = schoolRepository.findSchoolById(oldUser.getId());
         if (school == null) {
@@ -130,5 +139,37 @@ public class SchoolService {
 
 
 
+
+    //40
+    public void updateRequestStatus(Integer userId, Integer requestId, String status) {
+        School school = schoolRepository.findSchoolById(userId);
+        if (school == null) {
+            throw new ApiException("School not found");
+        }
+
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        if (request == null) {
+            throw new ApiException("Request not found");
+        }
+
+
+        Student student = request.getStudent();
+        if (!student.getSchool().getId().equals(school.getId())) {
+            throw new ApiException("This student does not belong to your school");
+        }
+
+
+        if (request.getOpportunity().getEndDate().isAfter(LocalDate.now())) {
+            throw new ApiException("Cannot update status. Opportunity has not ended yet");
+        }
+
+
+        if (!status.equals("completed") && !status.equals("incomplete")) {
+            throw new ApiException("Invalid status. Must be 'completed' or 'incomplete'");
+        }
+
+        request.setStatus(status.toLowerCase());
+        studentOpportunityRequestRepository.save(request);
+    }
 
 }

@@ -61,6 +61,7 @@ public class OrganizationController {
         return ResponseEntity.status(HttpStatus.OK).body(totalHours);
     }
 
+
     @GetMapping("/organization/pending/{organizationId}")
     public ResponseEntity<?> getPendingRequests(@PathVariable Integer organizationId) {
         List<StudentOpportunityRequest> requests = organizationService.getPendingRequestsByOrganization(organizationId);
@@ -90,7 +91,6 @@ public class OrganizationController {
         organizationService.closeOpportunity(opportunityId, organizationId);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity status updated to closed"));
     }
-
 
 
 

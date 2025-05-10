@@ -8,7 +8,9 @@ import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
 import org.springframework.mail.MailSender;
+ 
 import org.springframework.mail.SimpleMailMessage;
+ 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +21,9 @@ public class OpportunityService {
 
     private final OpportunityRepository opportunityRepository;
     private final OrganizationRepository organizationRepository;
+ 
     private final MailSender mailSender;
+ 
 
 
 
@@ -106,7 +110,9 @@ public class OpportunityService {
         int count = 0;
 
         for (Opportunity o : opportunities) {
+ 
             if (o.getStatus().equalsIgnoreCase(status)) {
+ 
                 count++;
             }
         }
@@ -126,6 +132,7 @@ public class OpportunityService {
         return opportunityRepository.findOpportunitiesByStatus(status);
     }
 
+ 
     // 27
     public void acceptOpportunity(Integer opportunityId) {
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
@@ -203,6 +210,7 @@ public class OpportunityService {
 
 
 
+ 
 
 
 }

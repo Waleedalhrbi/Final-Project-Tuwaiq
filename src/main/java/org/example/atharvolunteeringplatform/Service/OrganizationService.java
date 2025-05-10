@@ -11,8 +11,10 @@ import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
+ 
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+ 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,7 +29,9 @@ public class OrganizationService {
     private final MyUserRepository userRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     private final OpportunityRepository opportunityRepository;
+ 
     private final MailSender mailSender;
+ 
 
 
     public List<Organization> findAll() {
@@ -126,6 +130,7 @@ public class OrganizationService {
     }
 
 
+ 
     //عرض طلبات التطوع المرسلة من قبل الطلاب : 30
     public List<StudentOpportunityRequest> getPendingRequestsByOrganization(Integer organizationId) {
         Organization organization = organizationRepository.findOrganizationById(organizationId);
@@ -216,6 +221,7 @@ public class OrganizationService {
 
 
 
+ 
 
 
 

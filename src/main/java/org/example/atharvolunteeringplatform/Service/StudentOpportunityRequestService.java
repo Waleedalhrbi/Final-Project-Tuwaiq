@@ -77,4 +77,17 @@ public class StudentOpportunityRequestService {
         studentOpportunityRequestRepository.delete(existingRequest);
     }
 
+
+
+    //15
+    public List<StudentOpportunityRequest> getCompletedOpportunitiesByStudent(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+
+        return studentOpportunityRequestRepository.findCompletedOpportunitiesByStudentId(studentId);
+    }
+
+ 
 }
