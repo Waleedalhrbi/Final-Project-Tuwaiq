@@ -3,13 +3,19 @@ package org.example.atharvolunteeringplatform.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.DTO.StudentDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
+import org.example.atharvolunteeringplatform.Model.Student;
+import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
+import org.example.atharvolunteeringplatform.Service.StudentOpportunityRequestService;
 import org.example.atharvolunteeringplatform.Service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/student")
@@ -17,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class StudentController {
 
     private final StudentService studentService;
-
+    private final StudentOpportunityRequestService studentOpportunityRequestService;
     @GetMapping("/get-all")
     public ResponseEntity getAllStudents() {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getAllStudents());
@@ -40,4 +46,35 @@ public class StudentController {
         studentService.deleteStudent(myUser.getEmail());
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student deleted successfully"));
     }
+
+//    @GetMapping("/opportunities-by-hours")
+//    public ResponseEntity getOpportunitiesSortedByHours() {
+//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesSortedByHours());
+//    }
+
+//    @GetMapping("/opportunities-by-date/{from}/{to}")
+//    public ResponseEntity getOpportunitiesByDateRange(@PathVariable LocalDate from, @PathVariable LocalDate to) {
+//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesByDateRange(from, to));
+//    }
+
+    @GetMapping("/my-requests")
+    public ResponseEntity getMyRequests(/*@AuthenticationPrincipal*/ MyUser user) {
+        return ResponseEntity.status(HttpStatus.OK).body(studentService.getMyRequests(user.getId()));
+    }
+
+
+
+
+    @GetMapping("/completed-opportunities")
+    public ResponseEntity getCompletedOpportunities(/*@AuthenticationPrincipal*/ MyUser user) {
+
+        return ResponseEntity.ok(studentOpportunityRequestService.getCompletedOpportunitiesByStudent(user.getId()));
+    }
+
+
+    @GetMapping("/hours-summary")
+    public ResponseEntity<?> getHoursSummary(/*@AuthenticationPrincipal*/ MyUser user) {
+        return ResponseEntity.ok(studentService.getStudentHoursSummary(user.getId()));
+    }
+
 }

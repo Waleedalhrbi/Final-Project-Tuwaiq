@@ -4,13 +4,28 @@ import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.StudentDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
+ 
+import org.example.atharvolunteeringplatform.Model.School;
+ 
+import org.example.atharvolunteeringplatform.Model.Opportunity;
+ 
 import org.example.atharvolunteeringplatform.Model.Student;
+import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
+ 
+import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
+ 
+import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
+import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
+ 
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +34,13 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final MyUserRepository myUserRepository;
+ 
+    private final SchoolRepository schoolRepository;
+ 
+    private final OpportunityRepository opportunityRepository;
+    private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
+
+
 
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
@@ -26,6 +48,7 @@ public class StudentService {
 
     public void addStudent(StudentDTO studentDTO) {
 
+        List<School> schools = schoolRepository.findAll();
         MyUser myUser = new MyUser();
         myUser.setName(studentDTO.getName());
         myUser.setEmail(studentDTO.getEmail());
@@ -40,14 +63,28 @@ public class StudentService {
 
 
         Student student = new Student();
+        student.setName(studentDTO.getName());
         student.setSchool_name(studentDTO.getSchool_name());
         student.setAge(studentDTO.getAge());
         student.setGrade_level(studentDTO.getGrade_level());
         student.setGender(studentDTO.getGender());
         student.setStatus("Inactive");
+
+        School matchedSchool = null;
+        for (School school : schools) {
+            if (school != null && school.getName() != null && studentDTO.getSchool_name().equalsIgnoreCase(school.getName())) {
+                matchedSchool = school;
+                break;
+            }
+        }
+
+        if (matchedSchool == null) {
+            throw new ApiException("School with name '" + studentDTO.getSchool_name() + "' not found");
+        }
+
+        student.setSchool(matchedSchool);
+
         student.setUserStudent(myUser);
-
-
         studentRepository.save(student);
     }
 
@@ -97,4 +134,47 @@ public class StudentService {
 
         myUserRepository.delete(oldUser);
     }
+
+//    //3
+//    public List<Opportunity> getOpportunitiesSortedByHours() {
+//        return opportunityRepository.findAllByOrderByHoursDesc();
+//    }
+
+    //7
+//    public List<Opportunity> getOpportunitiesByDateRange(LocalDate from, LocalDate to) {
+//        return opportunityRepository.findByStartDateBetween(from, to);
+//    }
+
+    //9
+    public List<StudentOpportunityRequest> getMyRequests(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+        return studentOpportunityRequestRepository.findAllByStudent(student);
+    }
+
+
+    //16
+    public Map<String, Integer> getStudentHoursSummary(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+
+        int completedHours = 0;
+        if (student.getTotal_hours() != null) {
+            completedHours = student.getTotal_hours();
+        }
+        int requiredHours = 40;
+        int remainingHours = Math.max(requiredHours - completedHours, 0);
+
+        Map<String, Integer> hoursSummary = new HashMap<>();
+        hoursSummary.put("completed_hours", completedHours);
+        hoursSummary.put("remaining_hours", remainingHours);
+
+        return hoursSummary;
+    }
+
+
 }

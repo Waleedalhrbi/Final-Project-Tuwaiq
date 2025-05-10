@@ -11,6 +11,10 @@ import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
+ 
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+ 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +29,9 @@ public class OrganizationService {
     private final MyUserRepository userRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     private final OpportunityRepository opportunityRepository;
+ 
+    private final MailSender mailSender;
+ 
 
 
     public List<Organization> findAll() {
@@ -122,6 +129,111 @@ public class OrganizationService {
         return totalHours;
     }
 
+
+ 
+    //عرض طلبات التطوع المرسلة من قبل الطلاب : 30
+    public List<StudentOpportunityRequest> getPendingRequestsByOrganization(Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+
+        return studentOpportunityRequestRepository.findPendingRequestsByOrganizationId(organizationId);
+    }
+
+    //32
+    public void rejectVolunteerRequest(Integer requestId) {
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        if (request == null) {
+            throw new ApiException("Request not found");
+        }
+
+        request.setStatus("rejected");
+        studentOpportunityRequestRepository.save(request);
+
+        String to = request.getStudent().getUserStudent().getEmail();
+        String subject = "رفض طلب التطوع";
+        String body = "نأسف، تم رفض طلبك للتطوع في الفرصة: " + request.getOpportunity().getTitle();
+
+        sendDecisionEmail(to, subject, body);
+    }
+
+    //34
+    public List<StudentOpportunityRequest> getVolunteerRequestHistory(Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+        return studentOpportunityRequestRepository.findHistoryByOrganizationId(organizationId);
+    }
+
+    public void openOpportunity(Integer opportunityId, Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        List<Opportunity> opportunities = opportunityRepository.findOpportunitiesByOrganizationId(organizationId);
+
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+        if (opportunity.getOrganization().getId() != organizationId) {
+            throw new ApiException("Unauthorized access");
+        }
+
+        if (opportunity.getStatus().equalsIgnoreCase("open") || opportunity.getStatus().equalsIgnoreCase("closed") || opportunity.getStatus().equalsIgnoreCase("accepted")) {
+            opportunity.setStatus("open");
+        }
+        opportunityRepository.save(opportunity);
+    }
+
+    public void closeOpportunity(Integer opportunityId, Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        List<Opportunity> opportunities = opportunityRepository.findOpportunitiesByOrganizationId(organizationId);
+
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+        if (opportunity.getOrganization().getId() != organizationId) {
+            throw new ApiException("Unauthorized access");
+        }
+
+        if (opportunity.getStatus().equalsIgnoreCase("open") || opportunity.getStatus().equalsIgnoreCase("closed") || opportunity.getStatus().equalsIgnoreCase("accepted")) {
+            opportunity.setStatus("closed");
+        }
+        opportunityRepository.save(opportunity);
+    }
+
+
+    public void sendDecisionEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+
+    //55
+    public void activateOrganization(Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
+
+        if (organization.getStatus().equalsIgnoreCase("Active")) {
+            throw new ApiException("Organization is already active");
+        }
+
+        organization.setStatus("Active");
+        organizationRepository.save(organization);
+    }
 
 
 

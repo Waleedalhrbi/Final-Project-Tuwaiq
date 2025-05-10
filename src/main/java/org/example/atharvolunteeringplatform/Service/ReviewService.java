@@ -24,53 +24,39 @@ public class ReviewService {
     }
 
     //Integer supervisorId
-//    public void addReview(Integer opportunityId, Integer studentId, Review review, Integer supervisorId) {
-//        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
-//        if (opportunity == null) {
-//            throw new ApiException("Opportunity not found");
-//        }
-//
-//        Student student = studentRepository.findStudentById(studentId);
-//        if (student == null) {
-//            throw new ApiException("student not found");
-//        }
-//
-//        // تحقق من وجود علاقة بين الطالب والفرصة وأنها مكتملة
-//        StudentOpportunityRequest request = studentOpportunityRequestRepository.findByStudentAndOpportunity(student, opportunity);
-//        if (request == null) {
-//            throw new ApiException("No application found for this student and opportunity");
-//        }
-//        if (!request.getStatus().equalsIgnoreCase("complete")) {
-//            throw new ApiException("The student has not completed the opportunity");
-//        }
-//
-//        // تحقق من أن المستخدم هو مشرف المدرسة
-//        MyUser supervisor = myUserRepository.findMyUserById(supervisorId);
-//        if (supervisor == null) {
-//            throw new ApiException("Supervisor not found");
-//        }
-//
-//        if (!supervisor.getRole().equalsIgnoreCase("supervisor")) {
-//            throw new ApiException("Only school supervisors can add reviews");
-//        }
-//        review.setCreatedAt(LocalDateTime.now());
-//        review.setSchool(student.getSchool());
-//        review.setOpportunity(opportunity);
-//        reviewRepository.save(review);
-//    }
-
-    //36
-    public List<Review> getOpportunityReviewsForOrganization(Integer opportunityId, Integer organizationId) {
+    public void addReview(Integer opportunityId, Integer studentId, Review review, Integer supervisorId) {
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
 
-        if (!opportunity.getOrganization().getId().equals(organizationId)) {
-            throw new RuntimeException("You do not have access to view Review for this opportunity");
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null) {
+            throw new ApiException("student not found");
         }
 
-        return reviewRepository.findByOpportunityId(opportunityId);
+        // تحقق من وجود علاقة بين الطالب والفرصة وأنها مكتملة
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findByStudentAndOpportunity(student, opportunity);
+        if (request == null) {
+            throw new ApiException("No application found for this student and opportunity");
+        }
+        if (!request.getStatus().equalsIgnoreCase("complete")) {
+            throw new ApiException("The student has not completed the opportunity");
+        }
+
+        // تحقق من أن المستخدم هو مشرف المدرسة
+        MyUser supervisor = myUserRepository.findMyUserById(supervisorId);
+        if (supervisor == null) {
+            throw new ApiException("Supervisor not found");
+        }
+
+        if (!supervisor.getRole().equalsIgnoreCase("supervisor")) {
+            throw new ApiException("Only school supervisors can add reviews");
+        }
+        review.setCreatedAt(LocalDateTime.now());
+        review.setSchool(student.getSchool());
+        review.setOpportunity(opportunity);
+        reviewRepository.save(review);
     }
 
     //41
@@ -78,20 +64,40 @@ public class ReviewService {
         List<StudentOpportunityRequest> requests = studentOpportunityRequestRepository.findCompletedRequestsForOpportunity(opportunityId, schoolId);
 
         if (requests.isEmpty()) {
-            return "You cannot evaluate this opportunity because it is not associated with a student from the school or has not yet been completed.";
+            return "You cannot rate this opportunity because it is not associated with a student from the school or has not yet been completed.";
         }
+
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
         if (opportunity == null) {
-            throw new ApiException("Opportunity not found");
-        }
+        throw new ApiException("Opportunity not found");}
 
         review.setOpportunity(opportunity);
         review.setCreatedAt(LocalDateTime.now());
+
         reviewRepository.save(review);
 
-        return "Opportunity review added successfully";
+        return "review added successfully";
     }
 
+    //36
+    public List<Review> getOpportunityReviewsForOrganization(Integer opportunityId, Integer organizationId) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity==null){
+            throw new ApiException("Opportunity not found");
+        }
+
+        if (!opportunity.getOrganization().getId().equals(organizationId)) {
+            throw new RuntimeException("You do not have access to view evaluations for this opportunity");
+        }
+
+        return reviewRepository.findByOpportunityId(opportunityId);
+    }
+
+
+
+
+
+}
 //    public void updateReview(Integer reviewId, Review review) {
 //        Review oldReview = reviewRepository.findReviewById(reviewId);
 //        if (oldReview == null) {
@@ -110,4 +116,4 @@ public class ReviewService {
 //        reviewRepository.delete(oldReview);
 //        }
 
-}
+

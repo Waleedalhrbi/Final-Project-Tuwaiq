@@ -1,6 +1,9 @@
 package org.example.atharvolunteeringplatform.Repository;
 
+
+
 import org.example.atharvolunteeringplatform.Model.Opportunity;
+
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,11 +17,12 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
 
     StudentOpportunityRequest findStudentOpportunityRequestById(Integer id);
 
+ 
 //***
     StudentOpportunityRequest findByStudentAndOpportunity(Student student,Opportunity opportunity);
 
-//***
     List<StudentOpportunityRequest>findAllByStudentId(Integer studentId);
+
 
 
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Completed'")
@@ -35,4 +39,29 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
     // التأكد من وجود طالب من المدرسة قام بفرصة وحالتها منجزة
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.id = :opportunityId AND r.status = 'completed' AND r.student.school.id = :schoolId")
     List<StudentOpportunityRequest> findCompletedRequestsForOpportunity(Integer opportunityId, Integer schoolId);
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Pending'")
+    List<StudentOpportunityRequest> findPendingRequestsByOrganizationId(Integer organizationId);
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status IN ('accepted', 'rejected')")
+    List<StudentOpportunityRequest> findHistoryByOrganizationId(Integer organizationId);
+
+
+    List<StudentOpportunityRequest> findAllByStudent_Id(Integer studentId);
+
+
+
+
+ 
+
+    List<StudentOpportunityRequest> findAllByStudent(Student student);
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.student.id = ?1 AND LOWER(r.status) = 'completed'")
+    List<StudentOpportunityRequest> findCompletedOpportunitiesByStudentId(Integer studentId);
+
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.student.school.id = ?1")
+    List<StudentOpportunityRequest> findAllBySchoolId(Integer schoolId);
+
+
 }

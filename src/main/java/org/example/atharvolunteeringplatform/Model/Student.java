@@ -21,6 +21,9 @@ public class Student {
     private Integer id;
 
 
+    @NotEmpty(message = "Please enter the student name")
+    @Size(min = 2, max = 50, message = "Student name must be between 2 and 50 characters")
+    private String name;
 
     @NotEmpty(message = "Please enter the school name")
     @Size(min = 2, max = 100, message = "School name must be between 2 and 100 characters")
