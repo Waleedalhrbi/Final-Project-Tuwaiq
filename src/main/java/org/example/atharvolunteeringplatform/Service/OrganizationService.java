@@ -220,8 +220,21 @@ public class OrganizationService {
 
 
 
+    //55
+    public void activateOrganization(Integer organizationId) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
+        }
 
- 
+        if (organization.getStatus().equalsIgnoreCase("Active")) {
+            throw new ApiException("Organization is already active");
+        }
+
+        organization.setStatus("Active");
+        organizationRepository.save(organization);
+    }
+
 
 
 

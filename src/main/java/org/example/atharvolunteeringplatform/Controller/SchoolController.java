@@ -72,5 +72,23 @@ public class SchoolController {
         return ResponseEntity.ok("Request status updated to: " + status);
     }
 
+
+    @GetMapping("/requests")
+    public ResponseEntity<List<StudentOpportunityRequest>> getStudentRequestsBySchoolUser(/*@AuthenticationPrincipal*/ MyUser user) {
+
+        List<StudentOpportunityRequest> studentRequests = schoolService.getStudentRequestsBySchoolUser(user.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(studentRequests);
+    }
+
+    @PutMapping("/update-request-status/{requestId}/{status}")
+    public ResponseEntity<Void> updateOpportunityRequestStatus(/* @AuthenticationPrincipal*/ MyUser user, @PathVariable Integer requestId, @PathVariable String status) {
+
+
+        schoolService.updateOpportunityRequestStatus(user.getId(), requestId, status);
+
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
  
 }

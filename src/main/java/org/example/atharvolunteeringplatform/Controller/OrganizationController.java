@@ -92,6 +92,11 @@ public class OrganizationController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity status updated to closed"));
     }
 
+    @PutMapping("/activate-organization/{organizationId}")
+    public ResponseEntity activateOrganization(@PathVariable Integer organizationId) {
+        organizationService.activateOrganization(organizationId);
+        return ResponseEntity.ok(new ApiResponse("Organization has been activated successfully"));
+    }
 
 
 }

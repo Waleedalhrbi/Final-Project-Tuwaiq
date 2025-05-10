@@ -209,9 +209,23 @@ public class OpportunityService {
 
 
 
+    //56
+    public void changeOpportunityStatus(Integer opportunityId, String newStatus) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
 
- 
+        String status = newStatus.toLowerCase();
 
+        if (status.equals("open") || status.equals("pending") || status.equals("accepted")
+                || status.equals("rejected") || status.equals("closed")) {
+            opportunity.setStatus(status);
+            opportunityRepository.save(opportunity);
+        } else {
+            throw new ApiException("Invalid status value");
+        }
+    }
 
 }
 
