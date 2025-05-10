@@ -33,7 +33,7 @@ public class StudentOpportunityRequest {
     private String organization_status;
 
 
-    @Pattern(regexp = "^(pending|rejected|progress|completed|incomplete)$", message = "Status must be one of: pending, rejected, progress, complete, incomplete")
+    @Pattern(regexp = "^(pending|rejected|approved|progress|completed|incomplete)$", message = "Status must be one of: pending, rejected, progress,approved, complete, incomplete")
     @Column(columnDefinition = "varchar(20)")
     private String status;
 

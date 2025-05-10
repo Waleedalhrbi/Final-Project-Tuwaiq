@@ -2,6 +2,7 @@ package org.example.atharvolunteeringplatform.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
+import org.example.atharvolunteeringplatform.DTO.OpportunityDTO;
 import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
@@ -11,6 +12,7 @@ import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -75,6 +77,42 @@ public class StudentOpportunityRequestService {
 
 
         studentOpportunityRequestRepository.delete(existingRequest);
+    }
+
+    //10
+    public List<OpportunityDTO> getOpportunitiesByRequestStatus(Integer studentId, String status) {
+
+        //نتحقق من ان الطالب مقدم على فرصه
+        boolean hasRequests = studentOpportunityRequestRepository.existsByStudentId(studentId);
+        if (!hasRequests) {
+            throw new ApiException("There are no volunteer opportunities offered by the student.");
+        }
+
+        // استخرج الطلبات حسب الحالة
+        List<StudentOpportunityRequest> requests = studentOpportunityRequestRepository.findByStudentIdAndStatus(studentId, status);
+
+        List<OpportunityDTO> dtoList = new ArrayList<>();
+        for (StudentOpportunityRequest request : requests) {
+            dtoList.add(new OpportunityDTO(request.getOpportunity()));
+        }
+        return dtoList;
+    }
+
+    //31
+    public void approveRequestByOrganization(Integer requestId, Integer organizationId) {
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        if(request==null){
+            throw  new ApiException("Request not found");
+        }
+        Opportunity opportunity = request.getOpportunity();
+
+//التحقق من ان الجهه هي نفس الجهه التي قدم عليها الطالب
+        if (!opportunity.getOrganization().getId().equals(organizationId)) {
+            throw new ApiException("You are not allowed to approve this request");
+        }
+
+        request.setOrganization_status("approved");
+        studentOpportunityRequestRepository.save(request);
     }
 
 

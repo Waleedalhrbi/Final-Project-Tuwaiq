@@ -3,6 +3,7 @@ package org.example.atharvolunteeringplatform.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
+import org.example.atharvolunteeringplatform.DTO.OpportunityDTO;
 import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
@@ -13,6 +14,8 @@ import org.springframework.mail.SimpleMailMessage;
  
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,6 +24,7 @@ public class OpportunityService {
 
     private final OpportunityRepository opportunityRepository;
     private final OrganizationRepository organizationRepository;
+
  
     private final MailSender mailSender;
  
@@ -52,6 +56,7 @@ public class OpportunityService {
         opportunity.setStudentCapacity(opportunity.getStudentCapacity());
         opportunity.setStartDate(opportunity.getStartDate());
         opportunity.setEndDate(opportunity.getEndDate());
+        opportunity.setCreatedAt(LocalDateTime.now());
 
         opportunity.setOrganization(organization);
         opportunityRepository.save(opportunity);
@@ -132,7 +137,57 @@ public class OpportunityService {
         return opportunityRepository.findOpportunitiesByStatus(status);
     }
 
- 
+    //2
+    // تحول كل فرصه الى DTO قبل لارجاع النتيجه لتفادي ظهور معلومات حساسه للطالب
+    public List<OpportunityDTO> getOpenOpportunitiesByType(String typeOpportunity) {
+        List<Opportunity> opportunities = opportunityRepository.findByTypeOpportunityAndStatus(typeOpportunity, "open");
+        List<OpportunityDTO> dtoList = new ArrayList<>();
+
+        for (Opportunity opportunity : opportunities) {
+            OpportunityDTO dto = new OpportunityDTO(opportunity);
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+    //56
+    //for Admin Only
+//    public void approveOpportunity(Integer opportunityId) {
+//        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+//        if(opportunity==null){
+//            throw  new ApiException("Opportunity not found");
+//        }
+//        if (!opportunity.getStatus().equalsIgnoreCase("pending")) {
+//            throw new RuntimeException("Only pending opportunities can be approved");
+//        }
+//        opportunity.setStatus("open");
+//        opportunityRepository.save(opportunity);
+//    }
+
+    //6
+    public List<OpportunityDTO> getOpenOpportunitiesByLocation(String location) {
+        List<Opportunity> opportunities = opportunityRepository.findByLocationAndStatus(location, "open");
+
+        List<OpportunityDTO> dtoList = new ArrayList<>();
+        for (Opportunity opportunity : opportunities) {
+            dtoList.add(new OpportunityDTO(opportunity));
+        }
+
+        return dtoList;
+    }
+
+    //24
+    //الفرص من الاحدث
+    public List<Opportunity> getLatestOpportunitiesByOrganization(Integer organizationId) {
+        return opportunityRepository.findByOrganizationIdOrderByCreatedAtDesc(organizationId);
+    }
+
+    //29
+    public List<Opportunity> getOpportunitiesByOrganization(Integer organizationId) {
+        return opportunityRepository.findByOrganizationId(organizationId);
+    }
+
+
     // 27
     public void acceptOpportunity(Integer opportunityId) {
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);

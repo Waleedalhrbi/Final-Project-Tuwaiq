@@ -3,6 +3,7 @@ package org.example.atharvolunteeringplatform.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
+import org.example.atharvolunteeringplatform.DTO.OpportunityDTO;
 import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Service.OpportunityService;
@@ -86,40 +87,75 @@ public class OpportunityController {
         return ResponseEntity.status(HttpStatus.OK).body(opportunities);
     }
 
-
-    @PostMapping("/accept/{id}")
-    public ResponseEntity<?> acceptOpportunity(@PathVariable Integer id) {
-        opportunityService.acceptOpportunity(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity accepted and email sent."));
+    //2
+    @GetMapping("/type/{typeOpportunity}")
+    public ResponseEntity<List<OpportunityDTO>> getOpenOpportunitiesByType(@PathVariable String typeOpportunity) {
+        List<OpportunityDTO> opportunityDTOs = opportunityService.getOpenOpportunitiesByType(typeOpportunity);
+        return ResponseEntity.ok(opportunityDTOs);
     }
 
-    @PostMapping("/accept-edit/{id}")
-    public ResponseEntity<?> acceptOpportunityEdit(@PathVariable Integer id) {
-        opportunityService.acceptOpportunityEdit(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity edit accepted and email sent."));
+    //56
+    //for Admin
+//    @PutMapping("/approve/{opportunityId}")
+//    public ResponseEntity approveOpportunity(@PathVariable Integer opportunityId) {
+//        opportunityService.approveOpportunity(opportunityId);
+//        return ResponseEntity.ok(new ApiResponse("Opportunity approved successfully"));
+//    }
+
+
+    //6
+    @GetMapping("/search/by-location")
+    public ResponseEntity<List<OpportunityDTO>> getOpportunitiesByLocation(@RequestParam String location) {
+        List<OpportunityDTO> opportunityList = opportunityService.getOpenOpportunitiesByLocation(location);
+        return ResponseEntity.ok(opportunityList);
     }
 
-    @PostMapping("/reject/{id}")
-    public ResponseEntity<?> rejectOpportunity(@PathVariable Integer id) {
-        opportunityService.rejectOpportunity(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity rejected and email sent."));
+    //24
+    @GetMapping("/latest/{organizationId}")
+    public ResponseEntity<List<Opportunity>> getLatestOpportunities(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer organizationId) {
+        List<Opportunity> opportunities = opportunityService.getLatestOpportunitiesByOrganization(organizationId);
+        return ResponseEntity.ok(opportunities);
     }
 
-    @PostMapping("/reject-edit/{id}")
-    public ResponseEntity<?> rejectOpportunityEdit(@PathVariable Integer id) {
-        opportunityService.rejectOpportunityEdit(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity edit rejected and email sent."));
-    }
+    //29
+    @GetMapping("/organization-opportunity/{organizationId}")
+    public ResponseEntity<List<Opportunity>> getOpportunitiesByOrganization(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer organizationId) {
+        List<Opportunity> opportunities = opportunityService.getOpportunitiesByOrganization(organizationId);
+        return ResponseEntity.ok(opportunities);}
 
-    @PutMapping("/admin/change-opportunity-status/{opportunityId}/{newStatus}")
-    public ResponseEntity changeOpportunityStatus(
-            @PathVariable Integer opportunityId,
-            @PathVariable String newStatus) {
-        opportunityService.changeOpportunityStatus(opportunityId, newStatus);
-        return ResponseEntity.ok(new ApiResponse("Status updated successfully"));
-    }
+        @PostMapping("/accept/{id}")
+        public ResponseEntity<?> acceptOpportunity (@PathVariable Integer id){
+            opportunityService.acceptOpportunity(id);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity accepted and email sent."));
+        }
 
-}
+        @PostMapping("/accept-edit/{id}")
+        public ResponseEntity<?> acceptOpportunityEdit (@PathVariable Integer id){
+            opportunityService.acceptOpportunityEdit(id);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity edit accepted and email sent."));
+        }
+
+        @PostMapping("/reject/{id}")
+        public ResponseEntity<?> rejectOpportunity (@PathVariable Integer id){
+            opportunityService.rejectOpportunity(id);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity rejected and email sent."));
+        }
+
+        @PostMapping("/reject-edit/{id}")
+        public ResponseEntity<?> rejectOpportunityEdit (@PathVariable Integer id){
+            opportunityService.rejectOpportunityEdit(id);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity edit rejected and email sent."));
+        }
+
+        @PutMapping("/admin/change-opportunity-status/{opportunityId}/{newStatus}")
+        public ResponseEntity changeOpportunityStatus (
+                @PathVariable Integer opportunityId,
+                @PathVariable String newStatus){
+            opportunityService.changeOpportunityStatus(opportunityId, newStatus);
+            return ResponseEntity.ok(new ApiResponse("Status updated successfully"));
+        }
+
+    }
 
 
 

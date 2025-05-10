@@ -2,6 +2,7 @@ package org.example.atharvolunteeringplatform.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.Model.Complaint;
 import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Service.ComplaintsService;
@@ -27,7 +28,7 @@ public class ComplaintsController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addComplaint(@RequestBody @Valid Complaint complaint) {
+    public ResponseEntity addComplaint(@RequestBody @Valid Complaint complaint) {
         complaintsService.addComplaint(complaint);
         return ResponseEntity.ok("Complaint added successfully");
     }
@@ -45,20 +46,36 @@ public class ComplaintsController {
     }
 
 
+//    @GetMapping("/by-date/{from}/{to}")
+//    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDate from, @PathVariable LocalDate to) {
+//        List<Complaint> complaints = complaintsService.getComplaintsByDateRange(from, to);
+//        return ResponseEntity.status(HttpStatus.OK).body(complaints);
+//    }
 
-    @GetMapping("/by-date/{from}/{to}/{studentId}")
-    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to, @PathVariable Integer studentId) {
-        List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(studentId, from, to);
-        return ResponseEntity.status(HttpStatus.OK).body(complaints);
+    //12
+    @GetMapping("/complaints/{studentId}")
+    public ResponseEntity getComplaintsByStudent(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer studentId) {
+        List<Complaint> complaints = complaintsService.getComplaintsByStudentId(studentId);
+        if (complaints.isEmpty()) {
+            return ResponseEntity.ok().body(new ApiResponse("No complaints found"));
+        }
+        return ResponseEntity.ok(complaints);
     }
 
+//    @GetMapping("/by-date/{from}/{to}/{studentId}")
+//    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to, @PathVariable Integer studentId) {
+//        List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(studentId, from, to);
+//        return ResponseEntity.status(HttpStatus.OK).body(complaints);
+//
+//    }
 
 
-    @GetMapping("/my-complaints/{status}")
-    public ResponseEntity getMyComplaintsByStatus(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable String status) {
-        return ResponseEntity.status(HttpStatus.OK).body(
-                complaintsService.getMyComplaintsByStatus(user.getId(), status)
-        );
-    }
+
+//    @GetMapping("/my-complaints/{status}")
+//    public ResponseEntity getMyComplaintsByStatus(/*@AuthenticationPrincipalMyUser user*/, @PathVariable String status) {
+//        return ResponseEntity.status(HttpStatus.OK).body(
+//                complaintsService.getMyComplaintsByStatus(user.getId(), status));
+//    }
+
 
 }

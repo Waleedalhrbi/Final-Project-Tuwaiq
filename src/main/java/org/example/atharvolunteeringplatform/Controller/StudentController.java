@@ -47,15 +47,15 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student deleted successfully"));
     }
 
-    @GetMapping("/opportunities-by-hours")
-    public ResponseEntity getOpportunitiesSortedByHours() {
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesSortedByHours());
-    }
+//    @GetMapping("/opportunities-by-hours")
+//    public ResponseEntity getOpportunitiesSortedByHours() {
+//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesSortedByHours());
+//    }
 
-    @GetMapping("/opportunities-by-date/{from}/{to}")
-    public ResponseEntity getOpportunitiesByDateRange(@PathVariable LocalDate from, @PathVariable LocalDate to) {
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesByDateRange(from, to));
-    }
+//    @GetMapping("/opportunities-by-date/{from}/{to}")
+//    public ResponseEntity getOpportunitiesByDateRange(@PathVariable LocalDate from, @PathVariable LocalDate to) {
+//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesByDateRange(from, to));
+//    }
 
     @GetMapping("/my-requests")
     public ResponseEntity getMyRequests(/*@AuthenticationPrincipal*/ MyUser user) {
