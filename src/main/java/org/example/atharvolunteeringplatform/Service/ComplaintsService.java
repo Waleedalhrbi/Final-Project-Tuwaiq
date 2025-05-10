@@ -16,7 +16,6 @@ public class ComplaintsService {
 
     private final ComplaintsRepository complaintsRepository;
 
-
     public List<Complaint> getAllComplaints() {
         return complaintsRepository.findAll();
     }
@@ -45,13 +44,20 @@ public class ComplaintsService {
         complaintsRepository.delete(complaint);
     }
 
-    public List<Complaint> getComplaintsByStudentId(Integer studentId) {
-        return complaintsRepository.findByStudentsId(studentId);
-    }
-
 
     //14
-    public List<Complaint> getComplaintsByDateRange(LocalDate from, LocalDate to) {
-        return complaintsRepository.findComplaintsByCreateAtDateBetween(from, to);
+ 
+    public List<Complaint> getComplaintsByStudentAndDate(Integer studentId, LocalDateTime from, LocalDateTime to) {
+        return complaintsRepository.findByStudentIdAndCreateAtBetween(studentId, from, to);
     }
+    public List<Complaint> getComplaintsByDateRange(LocalDateTime  from, LocalDateTime  to) {
+        return complaintsRepository.findComplaintsByCreateAtBetweenDates(from, to);
+    }
+
+    //13
+    public List<Complaint> getMyComplaintsByStatus(Integer studentId, String status) {
+        return complaintsRepository.findByStudentIdAndStatus(studentId, status);
+ 
+    }
+
 }

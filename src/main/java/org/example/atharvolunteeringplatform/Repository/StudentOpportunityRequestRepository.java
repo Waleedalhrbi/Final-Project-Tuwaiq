@@ -63,5 +63,6 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.student.school.id = ?1")
     List<StudentOpportunityRequest> findAllBySchoolId(Integer schoolId);
 
+    boolean existsByStudentAndOpportunity(Student student, Opportunity opportunity);
 
 }

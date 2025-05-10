@@ -31,20 +31,18 @@ public class StudentOpportunityRequestService {
     }
 
 
-
-    public void RequestOpportunity(Integer studentId, Integer opportunityId, StudentOpportunityRequest studentOpportunityRequest){
+    public void RequestOpportunity(Integer studentId, Integer opportunityId, StudentOpportunityRequest studentOpportunityRequest) {
         Student student = studentRepository.findStudentById(studentId);
         if (student == null) {
             throw new ApiException("Student not found");
         }
-
 
         Opportunity opportunity = opportunityrepository.findOpportunityById(opportunityId);
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
 
-        if (student.getStatus().equalsIgnoreCase("Inactive")){
+        if (student.getStatus().equalsIgnoreCase("Inactive")) {
             throw new ApiException("Student account not active");
         }
 
@@ -53,15 +51,17 @@ public class StudentOpportunityRequestService {
         }
 
 
+        boolean alreadyRequested = studentOpportunityRequestRepository.existsByStudentAndOpportunity(student, opportunity);
+        if (alreadyRequested) {
+            throw new ApiException("Student has already applied for this opportunity");
+        }
+
         studentOpportunityRequest.setSupervisor_status("pending");
         studentOpportunityRequest.setOrganization_status("pending");
         studentOpportunityRequest.setStatus("pending");
-
-
         studentOpportunityRequest.setStudent(student);
         studentOpportunityRequest.setOpportunity(opportunity);
         studentOpportunityRequest.setApplied_at(LocalDateTime.now());
-
 
         studentOpportunityRequestRepository.save(studentOpportunityRequest);
     }

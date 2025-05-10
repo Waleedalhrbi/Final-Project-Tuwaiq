@@ -1,5 +1,7 @@
 package org.example.atharvolunteeringplatform.Service;
 
+import com.itextpdf.text.Font;
+import com.itextpdf.text.pdf.BaseFont;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.StudentDTO;
@@ -19,8 +21,10 @@ import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
  
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -80,6 +84,10 @@ public class StudentService {
 
         if (matchedSchool == null) {
             throw new ApiException("School with name '" + studentDTO.getSchool_name() + "' not found");
+        }
+
+        if (!"Active".equalsIgnoreCase(matchedSchool.getStatus())) {
+            throw new ApiException("Cannot register student to a school that is not Active");
         }
 
         student.setSchool(matchedSchool);
@@ -174,6 +182,84 @@ public class StudentService {
         hoursSummary.put("remaining_hours", remainingHours);
 
         return hoursSummary;
+    }
+
+
+    public void requestCertificate(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null) throw new ApiException("Student not found");
+
+        if (student.getTotal_hours() == null || student.getTotal_hours() < 40) {
+            throw new ApiException("Student has not completed 40 hours.");
+        }
+
+        byte[] pdf = generateCertificatePdf(student.getName());
+        sendCertificateEmail(student.getUserStudent().getEmail(), pdf);
+    }
+    private byte[] generateCertificatePdf(String studentName) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+            com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document, out);
+            document.open();
+
+            // Load English font
+            String fontPath = "src/main/resources/fonts/GreatVibes-Regular.ttf";  // Change this to your actual font path
+            BaseFont baseFont = BaseFont.createFont(fontPath, BaseFont.WINANSI, BaseFont.EMBEDDED);
+            Font font = new Font(baseFont, 16, Font.NORMAL);
+            Font titleFont = new Font(baseFont, 20, Font.BOLD);
+
+            // Title
+            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("Certificate of Volunteering", titleFont);
+            title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            document.add(title);
+
+            document.add(new com.itextpdf.text.Paragraph(" ")); // Spacer
+
+            // Content
+            com.itextpdf.text.Paragraph paragraph1 = new com.itextpdf.text.Paragraph(
+                    "This is to certify that the student " + studentName + " has completed 40 hours of voluntary work.", font);
+            paragraph1.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
+            document.add(paragraph1);
+
+            com.itextpdf.text.Paragraph paragraph2 = new com.itextpdf.text.Paragraph(
+                    "We believe in the importance of volunteering and its positive impact on the community.", font);
+            paragraph2.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
+            document.add(paragraph2);
+
+            com.itextpdf.text.Paragraph paragraph3 = new com.itextpdf.text.Paragraph(
+                    "Issued on: " + LocalDate.now(), font);
+            paragraph3.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
+            document.add(paragraph3);
+
+            document.close();
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate PDF", e);
+        }
+    }
+
+
+
+
+
+    @Autowired
+    private org.springframework.mail.javamail.JavaMailSender javaMailSender;
+
+    private void sendCertificateEmail(String toEmail, byte[] pdfData) {
+        try {
+            org.springframework.mail.javamail.MimeMessageHelper helper;
+            jakarta.mail.internet.MimeMessage message = javaMailSender.createMimeMessage();
+            helper = new org.springframework.mail.javamail.MimeMessageHelper(message, true);
+
+            helper.setTo(toEmail);
+            helper.setSubject("شهادة إتمام ساعات تطوعية");
+            helper.setText("مبروك! تم إرفاق شهادتك بصيغة PDF.");
+            helper.addAttachment("VolunteerCertificate.pdf", new org.springframework.core.io.ByteArrayResource(pdfData));
+
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
     }
 
 
