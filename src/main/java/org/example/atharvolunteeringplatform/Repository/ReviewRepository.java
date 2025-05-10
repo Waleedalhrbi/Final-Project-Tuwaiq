@@ -13,11 +13,15 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     Review findReviewById(Integer id);
 
+    //36
+    List<Review> findByOpportunityId(Integer opportunityId);
     @Query("SELECT r FROM Review r WHERE r.opportunity.organization.id = ?1")
     List<Review> findAllByOrganizationId(Integer organizationId);
 
     List<Review> findAllByOpportunity(Opportunity opportunity);
 
     int countByOpportunity(Opportunity opportunity);
+
+
 
 }

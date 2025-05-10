@@ -21,12 +21,25 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
 //***
     StudentOpportunityRequest findByStudentAndOpportunity(Student student,Opportunity opportunity);
 
- 
+    List<StudentOpportunityRequest>findAllByStudentId(Integer studentId);
+
+
 
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Completed'")
     List<StudentOpportunityRequest> findCompletedByOrganizationId(Integer organizationId);
 
- 
+
+    //10
+    List<StudentOpportunityRequest> findByStudentIdAndStatus(Integer studentId, String status);
+
+    boolean existsByStudentId(Integer studentId);
+
+    //41
+    //تقيم الفرصه من شرف النشاط
+    // التأكد من وجود طالب من المدرسة قام بفرصة وحالتها منجزة
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.id = :opportunityId AND r.status = 'completed' AND r.student.school.id = :schoolId")
+    List<StudentOpportunityRequest> findCompletedRequestsForOpportunity(Integer opportunityId, Integer schoolId);
+
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Pending'")
     List<StudentOpportunityRequest> findPendingRequestsByOrganizationId(Integer organizationId);
 
@@ -50,5 +63,6 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
     @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.student.school.id = ?1")
     List<StudentOpportunityRequest> findAllBySchoolId(Integer schoolId);
 
+    boolean existsByStudentAndOpportunity(Student student, Opportunity opportunity);
 
 }

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -58,6 +59,8 @@ public class Opportunity {
 
     @Pattern(regexp = "^(open|pending|accepted|rejected|closed)$", message = "Status must be one of: open, pending, Completed, Rejected, Closed")
     private String status;
+
+    private LocalDateTime createdAt;
 
 
 

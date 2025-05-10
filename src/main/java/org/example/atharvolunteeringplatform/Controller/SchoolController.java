@@ -5,6 +5,7 @@ package org.example.atharvolunteeringplatform.Controller;
 //import com.example.final_project.Service.SchoolService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.School;
@@ -50,7 +51,17 @@ public class SchoolController {
         return ResponseEntity.ok("School deleted successfully");
     }
 
- 
+    //38
+    @GetMapping("/volunteers")
+    public ResponseEntity getVolunteeringStudents(@RequestParam String grade) {
+        List<Student> students = schoolService.getVolunteeringStudentsByGrade(grade);
+        if(students.isEmpty()) {
+            return ResponseEntity.ok().body(new ApiResponse("No result for this Data"));
+
+        }
+        return ResponseEntity.ok(students);
+    }
+
     @GetMapping("/students/non-volunteers/{gradeLevel}/{schoolId}")
     public ResponseEntity<?> getNonVolunteers(/*@AuthenticationPrincipal MyUser myUser*/ @PathVariable String gradeLevel, @PathVariable Integer schoolId) {
         List<Student> students = schoolService.getNonVolunteersByGradeForSchool(gradeLevel, schoolId);
