@@ -55,8 +55,8 @@ public class Opportunity {
     @NotEmpty(message = "Location is required")
     private String location;
 
-    @Pattern(regexp = "^(open|pending|completed|rejected|closed)$", message = "Status must be one of: open, pending, Completed, Rejected, Closed")
-    @NotEmpty(message = "Status is required")
+
+    @Pattern(regexp = "^(open|pending|accepted|rejected|closed)$", message = "Status must be one of: open, pending, Completed, Rejected, Closed")
     private String status;
 
 
@@ -73,8 +73,7 @@ public class Opportunity {
     //****
     @OneToMany(mappedBy = "opportunity", cascade = CascadeType.ALL)
     private Set<StudentOpportunityRequest> studentOpportunityRequests;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "opportunity")
-    private Set<StudentOpportunityRequest>  studentOpportunityRequest;
+
 
 
 }

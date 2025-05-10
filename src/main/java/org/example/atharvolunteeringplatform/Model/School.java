@@ -1,5 +1,6 @@
 package org.example.atharvolunteeringplatform.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -21,9 +22,9 @@ public class School {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-//    @Column(nullable = false)
-//    @NotEmpty(message = "Name cannot be Empty")
-//    private String name;
+    @Column(nullable = false)
+    @NotEmpty(message = "Name cannot be Empty")
+    private String name;
 
     @Column(nullable = false)
     @NotEmpty(message = "Region cannot be Empty")
@@ -46,10 +47,13 @@ public class School {
     private String status;
 
     @OneToOne
+    @MapsId
+    @JsonIgnore
     private MyUser myUser;
 
 
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Student> students;
 
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)

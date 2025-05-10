@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.DTO.OrganizationDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
+import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Service.OrganizationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/organization")
@@ -57,6 +60,38 @@ public class OrganizationController {
         int totalHours = organizationService.getTotalVolunteeringHours(organizationId);
         return ResponseEntity.status(HttpStatus.OK).body(totalHours);
     }
+
+
+    @GetMapping("/organization/pending/{organizationId}")
+    public ResponseEntity<?> getPendingRequests(@PathVariable Integer organizationId) {
+        List<StudentOpportunityRequest> requests = organizationService.getPendingRequestsByOrganization(organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(requests);
+    }
+
+    @PostMapping("/reject-request/{requestId}")
+    public ResponseEntity<?> rejectVolunteerRequest(@PathVariable Integer requestId) {
+        organizationService.rejectVolunteerRequest(requestId);
+        return ResponseEntity.status(HttpStatus.OK).body("Volunteer request rejected and email sent.");
+    }
+
+    @GetMapping("/organization/history/{organizationId}")
+    public ResponseEntity<?> getVolunteerRequestHistory(@PathVariable Integer organizationId) {
+        List<StudentOpportunityRequest> history = organizationService.getVolunteerRequestHistory(organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(history);
+    }
+
+    @PutMapping("/open/{opportunityId}/{organizationId}")
+    public ResponseEntity<?> openOpportunity(@PathVariable Integer opportunityId, @PathVariable Integer organizationId) {
+        organizationService.openOpportunity(opportunityId, organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity status updated to open"));
+    }
+
+    @PutMapping("/close/{opportunityId}/{organizationId}")
+    public ResponseEntity<?> closeOpportunity(@PathVariable Integer opportunityId, @PathVariable Integer organizationId) {
+        organizationService.closeOpportunity(opportunityId, organizationId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity status updated to closed"));
+    }
+
 
 
 }

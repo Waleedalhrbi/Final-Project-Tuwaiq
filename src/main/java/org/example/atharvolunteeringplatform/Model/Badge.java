@@ -31,7 +31,7 @@ public class Badge {
     @Size(max = 255, message = "Description must not exceed 255 characters")
     private String description;
 
-    @NotEmpty(message = "Criteria is required")
+//    @NotEmpty(message = "Criteria is required")
     private Integer criteria;
 
     @NotEmpty(message = "Image path is required")

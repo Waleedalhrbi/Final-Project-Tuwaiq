@@ -45,11 +45,13 @@ public class ComplaintsController {
     }
 
 
-    @GetMapping("/by-date/{from}/{to}")
-    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime  to) {
-        List<Complaint> complaints = complaintsService.getComplaintsByDateRange(from, to);
+
+    @GetMapping("/by-date/{from}/{to}/{studentId}")
+    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to, @PathVariable Integer studentId) {
+        List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(studentId, from, to);
         return ResponseEntity.status(HttpStatus.OK).body(complaints);
     }
+
 
 
     @GetMapping("/my-complaints/{status}")
@@ -58,6 +60,5 @@ public class ComplaintsController {
                 complaintsService.getMyComplaintsByStatus(user.getId(), status)
         );
     }
-
 
 }
