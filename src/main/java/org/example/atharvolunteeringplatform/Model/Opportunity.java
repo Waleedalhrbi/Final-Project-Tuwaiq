@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -59,6 +60,8 @@ public class Opportunity {
     @NotEmpty(message = "Status is required")
     private String status;
 
+    private LocalDateTime createdAt;
+
 
 
     @ManyToOne
@@ -73,8 +76,7 @@ public class Opportunity {
     //****
     @OneToMany(mappedBy = "opportunity", cascade = CascadeType.ALL)
     private Set<StudentOpportunityRequest> studentOpportunityRequests;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "opportunity")
-    private Set<StudentOpportunityRequest>  studentOpportunityRequest;
+
 
 
 }

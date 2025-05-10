@@ -24,9 +24,10 @@ public class Complaint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 30)    private String title;
+    @Column(nullable = false, length = 30)
     @NotEmpty(message = "Title cannot be Empty")
     @Size(max = 30, message = "Title cannot exceed 30 characters")
+    private String title;
 
     @Column(nullable = false)
     @NotEmpty(message = "description cannot be Empty")

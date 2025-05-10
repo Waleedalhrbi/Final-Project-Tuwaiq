@@ -3,6 +3,7 @@ package org.example.atharvolunteeringplatform.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
+import org.example.atharvolunteeringplatform.DTO.OpportunityDTO;
 import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Service.OpportunityService;
@@ -85,6 +86,43 @@ public class OpportunityController {
     public ResponseEntity<?> getOpportunitiesByStatus(@PathVariable String status) {
         List<Opportunity> opportunities = opportunityService.getOpportunitiesByStatus(status);
         return ResponseEntity.status(HttpStatus.OK).body(opportunities);
+    }
+
+    //2
+    @GetMapping("/type/{typeOpportunity}")
+    public ResponseEntity<List<OpportunityDTO>> getOpenOpportunitiesByType(@PathVariable String typeOpportunity) {
+        List<OpportunityDTO> opportunityDTOs = opportunityService.getOpenOpportunitiesByType(typeOpportunity);
+        return ResponseEntity.ok(opportunityDTOs);
+    }
+
+    //56
+    //for Admin
+    @PutMapping("/approve/{opportunityId}")
+    public ResponseEntity approveOpportunity(@PathVariable Integer opportunityId) {
+        opportunityService.approveOpportunity(opportunityId);
+        return ResponseEntity.ok(new ApiResponse("Opportunity approved successfully"));
+    }
+
+
+    //6
+    @GetMapping("/search/by-location")
+    public ResponseEntity<List<OpportunityDTO>> getOpportunitiesByLocation(@RequestParam String location) {
+        List<OpportunityDTO> opportunityList = opportunityService.getOpenOpportunitiesByLocation(location);
+        return ResponseEntity.ok(opportunityList);
+    }
+
+    //24
+    @GetMapping("/latest/{organizationId}")
+    public ResponseEntity<List<Opportunity>> getLatestOpportunities(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer organizationId) {
+        List<Opportunity> opportunities = opportunityService.getLatestOpportunitiesByOrganization(organizationId);
+        return ResponseEntity.ok(opportunities);
+    }
+
+    //29
+    @GetMapping("/organization-opportunity/{organizationId}")
+    public ResponseEntity<List<Opportunity>> getOpportunitiesByOrganization(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer organizationId) {
+        List<Opportunity> opportunities = opportunityService.getOpportunitiesByOrganization(organizationId);
+        return ResponseEntity.ok(opportunities);
     }
 
 }

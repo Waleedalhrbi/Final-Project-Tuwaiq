@@ -24,5 +24,19 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, Intege
 
     List<Opportunity> findOpportunitiesByStatus( String status);
 
+    //2
+    List<Opportunity> findByTypeOpportunityAndStatus(String typeOpportunity, String status);
+
+    //6
+    List<Opportunity> findByLocationAndStatus(String location, String status);
+
+    //24
+    //Desc=بشكل تنازلي من الاحدث
+    List<Opportunity> findByOrganizationIdOrderByCreatedAtDesc(Integer organizationId);
+
+    //29
+    List<Opportunity> findByOrganizationId(Integer organizationId);
+
+
 
 }

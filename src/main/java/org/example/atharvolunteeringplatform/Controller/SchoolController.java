@@ -5,8 +5,10 @@ package org.example.atharvolunteeringplatform.Controller;
 //import com.example.final_project.Service.SchoolService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
 import org.example.atharvolunteeringplatform.Model.School;
+import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Service.SchoolService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +45,16 @@ public class SchoolController {
     public ResponseEntity<String> deleteSchool(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer id) {
         schoolService.deleteSchool(id);
         return ResponseEntity.ok("School deleted successfully");
+    }
+
+    //38
+    @GetMapping("/volunteers")
+    public ResponseEntity getVolunteeringStudents(@RequestParam String grade) {
+        List<Student> students = schoolService.getVolunteeringStudentsByGrade(grade);
+        if(students.isEmpty()) {
+            return ResponseEntity.ok().body(new ApiResponse("No result for this Data"));
+
+        }
+        return ResponseEntity.ok(students);
     }
 }

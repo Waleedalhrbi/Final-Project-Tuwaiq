@@ -11,8 +11,10 @@ import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.School;
+import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
+import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ public class SchoolService {
 
     private final SchoolRepository schoolRepository;
     private final MyUserRepository myUserRepository;
+    private final StudentRepository studentRepository;
 
     public List<School> getAllSchool() {
         return schoolRepository.findAll();
@@ -104,6 +107,11 @@ public class SchoolService {
 
         myUserRepository.delete(oldUser);
     }
+
+    //38
+        public List<Student> getVolunteeringStudentsByGrade(String grade) {
+            return studentRepository.findVolunteeringStudentsByGrade(grade);
+        }
 
 
 }

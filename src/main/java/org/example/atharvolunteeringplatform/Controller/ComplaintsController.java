@@ -2,6 +2,7 @@ package org.example.atharvolunteeringplatform.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.Model.Complaint;
 import org.example.atharvolunteeringplatform.Service.ComplaintsService;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class ComplaintsController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addComplaint(@RequestBody @Valid Complaint complaint) {
+    public ResponseEntity addComplaint(@RequestBody @Valid Complaint complaint) {
         complaintsService.addComplaint(complaint);
         return ResponseEntity.ok("Complaint added successfully");
     }
@@ -43,11 +44,22 @@ public class ComplaintsController {
     }
 
 
-    @GetMapping("/by-date/{from}/{to}")
-    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDate from, @PathVariable LocalDate to) {
-        List<Complaints> complaints = complaintsService.getComplaintsByDateRange(from, to);
-        return ResponseEntity.status(HttpStatus.OK).body(complaints);
+//    @GetMapping("/by-date/{from}/{to}")
+//    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDate from, @PathVariable LocalDate to) {
+//        List<Complaint> complaints = complaintsService.getComplaintsByDateRange(from, to);
+//        return ResponseEntity.status(HttpStatus.OK).body(complaints);
+//    }
+
+    //12
+    @GetMapping("/complaints/{studentId}")
+    public ResponseEntity getComplaintsByStudent(/*@AuthenticationPrincipal MyUser myUser*/@PathVariable Integer studentId) {
+        List<Complaint> complaints = complaintsService.getMyComplaints(studentId);
+        if(complaints.isEmpty()) {
+            return ResponseEntity.ok().body(new ApiResponse("No complaints found"));
+        }
+        return ResponseEntity.ok(complaints);
     }
+
 
 
 

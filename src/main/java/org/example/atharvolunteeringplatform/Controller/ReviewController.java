@@ -20,12 +20,12 @@ public class ReviewController {
     public ResponseEntity<List<Review>> getAllReviews() {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
-
-    @PostMapping("/add")
-    public ResponseEntity addReview(@RequestParam Integer opportunityId, @RequestParam Integer studentId,/*@AuthenticationPrincipal*/ @RequestParam Integer supervisorId,@RequestBody @Valid Review review) {
-        reviewService.addReview(opportunityId,studentId,review,supervisorId);
-        return ResponseEntity.ok("Review added successfully");
-    }
+//
+//    @PostMapping("/add")
+//    public ResponseEntity addReview(@RequestParam Integer opportunityId, @RequestParam Integer studentId,/*@AuthenticationPrincipal*/ @RequestParam Integer supervisorId,@RequestBody @Valid Review review) {
+//        reviewService.addReview(opportunityId,studentId,review,supervisorId);
+//        return ResponseEntity.ok("Review added successfully");
+//    }
 
 //    @PutMapping("/update/{id}")
 //    public ResponseEntity<String> updateReview(@PathVariable Integer id, @RequestBody @Valid Review review) {
@@ -38,4 +38,21 @@ public class ReviewController {
 //        reviewService.deleteReview(id);
 //        return ResponseEntity.ok("Review deleted successfully");
 //    }
+
+    //36
+    @GetMapping("/get-review/{opportunityId}/organization/{organizationId}")
+    public ResponseEntity getReviewForOpportunity(@PathVariable Integer opportunityId,/*@AuthenticationPrincipal*/@PathVariable Integer organizationId) {
+        List<Review> review = reviewService.getOpportunityReviewsForOrganization(opportunityId, organizationId);
+        if(review.isEmpty()) {
+            return ResponseEntity.ok().body("No review found");
+        }
+        return ResponseEntity.ok(review);
+    }
+
+    //41
+    @PostMapping("/review/{opportunityId}/school/{schoolId}")
+    public ResponseEntity<String> evaluateOpportunity(@PathVariable Integer opportunityId, /*@AuthenticationPrincipal*/@PathVariable Integer schoolId, @RequestBody @Valid Review review) {
+        return ResponseEntity.ok().body(reviewService.reviewOpportunity(opportunityId, schoolId,review));
+
+    }
 }
