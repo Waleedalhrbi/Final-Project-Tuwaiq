@@ -143,15 +143,15 @@ public class StudentService {
         myUserRepository.delete(oldUser);
     }
 
-//    //3
-//    public List<Opportunity> getOpportunitiesSortedByHours() {
-//        return opportunityRepository.findAllByOrderByHoursDesc();
-//    }
+    //3
+    public List<Opportunity> getOpportunitiesSortedByHours() {
+        return opportunityRepository.findAllByOrderByHoursDesc();
+    }
 
     //7
-//    public List<Opportunity> getOpportunitiesByDateRange(LocalDate from, LocalDate to) {
-//        return opportunityRepository.findByStartDateBetween(from, to);
-//    }
+    public List<Opportunity> getOpportunitiesByDateRange(LocalDate from, LocalDate to) {
+        return opportunityRepository.findByStartDateBetween(from, to);
+    }
 
     //9
     public List<StudentOpportunityRequest> getMyRequests(Integer studentId) {
