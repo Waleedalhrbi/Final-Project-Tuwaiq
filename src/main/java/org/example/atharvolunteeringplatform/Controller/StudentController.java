@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/student")
@@ -41,9 +42,9 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student updated successfully"));
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity deleteStudent(/*@AuthenticationPrincipal*/ MyUser myUser) {
-        studentService.deleteStudent(myUser.getEmail());
+    @DeleteMapping("/delete/{studentID}")
+    public ResponseEntity deleteStudent(@PathVariable Integer studentID) {
+        studentService.deleteStudent(studentID);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student deleted successfully"));
     }
 
@@ -77,4 +78,12 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getStudentHoursSummary(user.getId()));
     }
 
+
+    //44
+    //for supervisor
+    @GetMapping("/students-Inactive")
+    public ResponseEntity<List<Student>> getInactiveStudents(/*@AuthenticationPrincipal*/ MyUser user) {
+        List<Student> pendingStudents = studentService.getInactiveStudents(user.getId());
+        return ResponseEntity.ok(pendingStudents);
+    }
 }

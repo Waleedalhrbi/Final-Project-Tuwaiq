@@ -117,20 +117,35 @@ public class StudentService {
 
         myUserRepository.save(oldUser);
 
+        List<School> schools = schoolRepository.findAll();
+        School matchedSchool = null;
+        for (School school : schools) {
+            if (school != null && school.getName() != null && studentDTO.getSchool_name().equalsIgnoreCase(school.getName())) {
+                matchedSchool = school;
+                break;
+            }
+        }
 
-        student.setSchool_name(studentDTO.getSchool_name());
+        if (matchedSchool == null) {
+            throw new ApiException("School with name '" + studentDTO.getSchool_name() + "' not found");
+        }
+
+        if (!"Active".equalsIgnoreCase(matchedSchool.getStatus())) {
+            throw new ApiException("Cannot register student to a school that is not Active");
+        }
+
+        student.setSchool(matchedSchool);
+
+
         student.setAge(studentDTO.getAge());
         student.setGrade_level(studentDTO.getGrade_level());
-        student.setGender(studentDTO.getGender());
         student.setStatus(studentDTO.getStatus());
-        student.setTotal_hours(studentDTO.getTotal_hours());
-        student.setBadges_count(studentDTO.getBadges_count());
 
         studentRepository.save(student);
     }
 
-    public void deleteStudent(String email) {
-        MyUser oldUser = myUserRepository.findMyUserByEmail(email);
+    public void deleteStudent(Integer studentId) {
+        MyUser oldUser = myUserRepository.findMyUserById(studentId);
         if (oldUser == null) {
             throw new ApiException("Student not found");
         }
@@ -183,6 +198,16 @@ public class StudentService {
 
         return hoursSummary;
     }
+
+
+    //44
+    //for supervisor
+    //ارجاع الطالب المسجلين في الموقع لقبولهم
+    public List<Student> getInactiveStudents(Integer schoolId) {
+        return studentRepository.findStudentByStatus(schoolId);
+    }
+
+
 
 
     public void requestCertificate(Integer studentId) {

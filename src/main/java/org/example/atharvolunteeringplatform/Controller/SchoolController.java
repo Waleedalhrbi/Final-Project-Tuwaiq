@@ -52,13 +52,9 @@ public class SchoolController {
     }
 
     //38
-    @GetMapping("/volunteers")
-    public ResponseEntity getVolunteeringStudents(@RequestParam String grade) {
-        List<Student> students = schoolService.getVolunteeringStudentsByGrade(grade);
-        if(students.isEmpty()) {
-            return ResponseEntity.ok().body(new ApiResponse("No result for this Data"));
-
-        }
+    @GetMapping("/volunteers/{grade}")
+    public ResponseEntity getVolunteeringStudents(@PathVariable String grade, /*@AuthenticationPrincipal*/ MyUser user) {
+        List<Student> students = schoolService.getVolunteeringStudentsByGrade(grade, user.getId());
         return ResponseEntity.ok(students);
     }
 
@@ -101,5 +97,12 @@ public class SchoolController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
- 
+
+
+    //46
+    @PutMapping("/students/reject/{studentId}")
+    public ResponseEntity<String> rejectStudent(@PathVariable Integer studentId) {
+        schoolService.rejectStudentAccount(studentId);
+        return ResponseEntity.ok("Student account has been rejected.");
+    }
 }
