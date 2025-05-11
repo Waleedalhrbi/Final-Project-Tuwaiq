@@ -97,7 +97,6 @@ public class SchoolService {
 
         school.setRegion(schoolDTO.getRegion());
         school.setSupervisorName(schoolDTO.getSupervisorName());
-        school.setGender(schoolDTO.getGender());
         school.setCity(schoolDTO.getCity());
         school.setStatus("Pending");//الى ان تحصل على الموافقه بالتعديل
 
@@ -119,8 +118,14 @@ public class SchoolService {
     }
 
     //38
-        public List<Student> getVolunteeringStudentsByGrade(String grade) {
-            return studentRepository.findVolunteeringStudentsByGrade(grade);
+        public List<Student> getVolunteeringStudentsByGrade(String grade, Integer schoolID) {
+
+        School school = schoolRepository.findSchoolById(schoolID);
+        if (school == null ){
+            throw new ApiException("School not found");
+        }
+
+            return studentRepository.findVolunteeringStudentsByGradeAndSchoolId(grade,schoolID);
         }
 
     public List<StudentOpportunityRequest> getAllRequestsForStudent(Integer studentId, Integer schoolId) {
@@ -179,8 +184,34 @@ public class SchoolService {
             throw new ApiException("Invalid status. Must be 'completed' or 'incomplete'");
         }
 
+        if (status.equalsIgnoreCase("completed") && !request.getStatus().equalsIgnoreCase("completed")) {
+
+
+            Integer opportunityHours = request.getOpportunity().getHours();
+            student.setTotal_hours(student.getTotal_hours() + opportunityHours);
+        }
+
         request.setStatus(status.toLowerCase());
         studentOpportunityRequestRepository.save(request);
+        studentRepository.save(student);
+    }
+
+
+
+    //46
+    public void rejectStudentAccount(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+
+        if (student == null) {
+          throw new ApiException("Student not found");
+        }
+
+        if (!student.getStatus().equals("Pending") && !student.getStatus().equals("Inactive")) {
+            throw new ApiException("The account is already rejected");
+        }
+
+        student.setStatus("Rejected");
+        studentRepository.save(student);
     }
 
     //47
