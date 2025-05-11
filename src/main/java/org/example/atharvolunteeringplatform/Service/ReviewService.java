@@ -59,6 +59,14 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
+        public void deleteReview(Integer reviewId) {
+        Review oldReview = reviewRepository.findReviewById(reviewId);
+        if (oldReview == null) {
+            throw new ApiException("Review not found");
+        }
+        reviewRepository.delete(oldReview);
+        }
+
     //41
     public String reviewOpportunity(Integer opportunityId, Integer schoolId, Review review) {
         List<StudentOpportunityRequest> requests = studentOpportunityRequestRepository.findCompletedRequestsForOpportunity(opportunityId, schoolId);
@@ -94,6 +102,64 @@ public class ReviewService {
     }
 
 
+    public Double getAverageRating(Organization organization) {
+        List<Review> reviews = reviewRepository.findAllByOrganizationId(organization.getId());
+
+        if (reviews.isEmpty()) {
+            throw new ApiException("No reviews found for this organization");
+        }
+
+        double total = 0;
+        for (Review review : reviews) {
+            total += review.getRating();
+        }
+
+        return total / reviews.size();
+    }
+
+    public Integer getReviewCount(Organization organization) {
+        List<Review> reviews = reviewRepository.findAllByOrganizationId(organization.getId());
+        return reviews.size();
+    }
+
+    public Double getOpportunityAverageRating(Integer opportunityId, Organization organization) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+
+        if (!opportunity.getOrganization().getId().equals(organization.getId())) {
+            throw new ApiException("Access denied: not your opportunity");
+        }
+
+        List<Review> reviews = reviewRepository.findAllByOpportunity(opportunity);
+
+        if (reviews.isEmpty()) {
+            return 0.0;
+        }
+
+        double sum = 0;
+        for (Review review : reviews) {
+            sum += review.getRating();
+        }
+
+        return sum / reviews.size();
+    }
+
+    public Integer getReviewCountForOpportunity(Integer opportunityId, Organization organization) {
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+
+        if (opportunity == null) {
+            throw new ApiException("Opportunity not found");
+        }
+
+        if (!opportunity.getOrganization().getId().equals(organization.getId())) {
+            throw new ApiException("Access denied: not your opportunity");
+        }
+
+        return reviewRepository.countByOpportunity(opportunity);
+    }
 
 
 
@@ -108,12 +174,6 @@ public class ReviewService {
 //        reviewRepository.save(oldReview);
 //    }
 
-//    public void deleteReview(Integer reviewId) {
-//        Review oldReview = reviewRepository.findReviewById(reviewId);
-//        if (oldReview == null) {
-//            throw new ApiException("Review not found");
-//        }
-//        reviewRepository.delete(oldReview);
-//        }
+
 
 
