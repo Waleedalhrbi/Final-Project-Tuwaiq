@@ -52,7 +52,7 @@ public class OrganizationService {
 
         organization.setLicense(organizationDTO.getLicense());
         organization.setLocation(organizationDTO.getLocation());
-        organization.setStatus("InActive");
+        organization.setStatus("Inactive");
         organization.setUser(user);
         user.setOrganization(organization);
         organizationRepository.save(organization);
@@ -75,7 +75,7 @@ public class OrganizationService {
         oldOrganization.setDescription(oldOrganization.getDescription());
         oldOrganization.setLicense(oldOrganization.getLicense());
         oldOrganization.setLocation(oldOrganization.getLocation());
-
+        oldOrganization.setStatus("Inactive");
         organizationRepository.save(oldOrganization);
 
     }
@@ -142,21 +142,58 @@ public class OrganizationService {
     }
 
     //32
-    public void rejectVolunteerRequest(Integer requestId) {
+    public void rejectVolunteerRequest(Integer organizationId, Integer requestId) {
         StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
-        if (request == null) {
-            throw new ApiException("Request not found");
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+
+        if (organization == null) throw new ApiException("Organization not found");
+        if (organization.getStatus().equals("Inactive")) throw new ApiException("Organization is Inactive");
+        if (request == null) throw new ApiException("Request not found");
+        if (!request.getOpportunity().getOrganization().getId().equals(organization.getId())) {
+            throw new ApiException("Request is not in this organization");
         }
 
+        request.setOrganization_status("rejected");
         request.setStatus("rejected");
         studentOpportunityRequestRepository.save(request);
 
         String to = request.getStudent().getUserStudent().getEmail();
         String subject = "رفض طلب التطوع";
         String body = "نأسف، تم رفض طلبك للتطوع في الفرصة: " + request.getOpportunity().getTitle();
-
         sendDecisionEmail(to, subject, body);
     }
+
+
+
+    public void acceptVolunteerRequest(Integer organizationId, Integer requestId) {
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
+
+        if (organization == null) throw new ApiException("Organization not found");
+        if (organization.getStatus().equalsIgnoreCase("Inactive")) throw new ApiException("Organization is Inactive");
+        if (request == null) throw new ApiException("Request not found");
+
+        if (!request.getOpportunity().getOrganization().getId().equals(organization.getId())) {
+            throw new ApiException("Request is not in this organization");
+        }
+
+        request.setOrganization_status("approved");
+
+
+        if ("approved".equalsIgnoreCase(request.getSupervisor_status())) {
+            request.setStatus("approved");
+            request.setApproved_at(LocalDateTime.now());
+        }
+
+        studentOpportunityRequestRepository.save(request);
+
+        String to = request.getStudent().getUserStudent().getEmail();
+        String subject = "قبول طلب التطوع";
+        String body = "تهانينا! تم قبول طلبك للتطوع في الفرصة من قبل الجهة المنظمة: " + request.getOpportunity().getTitle();
+        sendDecisionEmail(to, subject, body);
+    }
+
+
 
     //34
     public List<StudentOpportunityRequest> getVolunteerRequestHistory(Integer organizationId) {
@@ -170,10 +207,12 @@ public class OrganizationService {
     public void openOpportunity(Integer opportunityId, Integer organizationId) {
         Organization organization = organizationRepository.findOrganizationById(organizationId);
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
-        List<Opportunity> opportunities = opportunityRepository.findOpportunitiesByOrganizationId(organizationId);
 
         if (organization == null) {
             throw new ApiException("Organization not found");
+        }
+        if (organization.getStatus().equals("Inactive") ) {
+            throw new ApiException("Organization is Inactive ");
         }
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
@@ -191,10 +230,12 @@ public class OrganizationService {
     public void closeOpportunity(Integer opportunityId, Integer organizationId) {
         Organization organization = organizationRepository.findOrganizationById(organizationId);
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
-        List<Opportunity> opportunities = opportunityRepository.findOpportunitiesByOrganizationId(organizationId);
 
         if (organization == null) {
             throw new ApiException("Organization not found");
+        }
+        if (organization.getStatus().equals("Inactive") ) {
+            throw new ApiException("Organization is Inactive ");
         }
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
@@ -227,23 +268,11 @@ public class OrganizationService {
             throw new ApiException("Organization not found");
         }
 
-        if (organization.getStatus().equalsIgnoreCase("Active")) {
+        if (organization.getStatus().equals("Active")) {
             throw new ApiException("Organization is already active");
         }
 
         organization.setStatus("Active");
         organizationRepository.save(organization);
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }

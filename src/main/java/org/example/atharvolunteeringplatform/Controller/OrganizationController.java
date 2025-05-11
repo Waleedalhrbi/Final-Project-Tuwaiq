@@ -68,10 +68,16 @@ public class OrganizationController {
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
-    @PostMapping("/reject-request/{requestId}")
-    public ResponseEntity<?> rejectVolunteerRequest(@PathVariable Integer requestId) {
-        organizationService.rejectVolunteerRequest(requestId);
+    @PostMapping("/reject-request/{requestId}/{organizationId}")
+    public ResponseEntity<?> rejectVolunteerRequest(@PathVariable Integer requestId,@PathVariable Integer organizationId ) {
+        organizationService.rejectVolunteerRequest(requestId,organizationId);
         return ResponseEntity.status(HttpStatus.OK).body("Volunteer request rejected and email sent.");
+    }
+
+    @PostMapping("/accept-request/{requestId}/{organizationId}")
+    public ResponseEntity<?> acceptVolunteerRequest(@PathVariable Integer requestId, @PathVariable Integer organizationId) {
+        organizationService.acceptVolunteerRequest(organizationId, requestId);
+        return ResponseEntity.status(HttpStatus.OK).body("Volunteer request accepted and email sent.");
     }
 
     @GetMapping("/organization/history/{organizationId}")

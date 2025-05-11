@@ -18,73 +18,63 @@ public class ReviewService {
     private final StudentRepository studentRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     private final MyUserRepository myUserRepository;
-
+    private final SchoolRepository schoolRepository;
     public List<Review> getAllReviews() {
         return reviewRepository.findAll();
     }
 
     //Integer supervisorId
-    public void addReview(Integer opportunityId, Integer studentId, Review review, Integer supervisorId) {
+    public void createReview(Review review, Integer schoolId, Integer opportunityId) {
+
+        School school = schoolRepository.findSchoolById(schoolId);
+        if (school == null) {
+            throw new ApiException("School not found");
+        }
+
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
 
-        Student student = studentRepository.findStudentById(studentId);
-        if (student == null) {
-            throw new ApiException("student not found");
+        List<StudentOpportunityRequest> completedRequests = studentOpportunityRequestRepository.findCompletedRequestsForOpportunity(opportunityId, schoolId);
+
+        if (completedRequests == null) {
+            throw new ApiException("This school is not allowed to review this opportunity");
         }
 
-        // تحقق من وجود علاقة بين الطالب والفرصة وأنها مكتملة
-        StudentOpportunityRequest request = studentOpportunityRequestRepository.findByStudentAndOpportunity(student, opportunity);
-        if (request == null) {
-            throw new ApiException("No application found for this student and opportunity");
-        }
-        if (!request.getStatus().equalsIgnoreCase("complete")) {
-            throw new ApiException("The student has not completed the opportunity");
-        }
-
-        // تحقق من أن المستخدم هو مشرف المدرسة
-        MyUser supervisor = myUserRepository.findMyUserById(supervisorId);
-        if (supervisor == null) {
-            throw new ApiException("Supervisor not found");
-        }
-
-        if (!supervisor.getRole().equalsIgnoreCase("supervisor")) {
-            throw new ApiException("Only school supervisors can add reviews");
-        }
+        review.setRating(review.getRating());
+        review.setComment(review.getComment());
         review.setCreatedAt(LocalDateTime.now());
-        review.setSchool(student.getSchool());
+        review.setSchool(school);
         review.setOpportunity(opportunity);
+
         reviewRepository.save(review);
     }
 
-        public void deleteReview(Integer reviewId) {
+
+
+    public void deleteReview(Integer reviewId) {
+
         Review oldReview = reviewRepository.findReviewById(reviewId);
         if (oldReview == null) {
             throw new ApiException("Review not found");
         }
+
         reviewRepository.delete(oldReview);
+    }
+
+    public void schoolDeleteReview(Integer reviewId, Integer schoolId) {
+
+        Review oldReview = reviewRepository.findReviewById(reviewId);
+        if (oldReview == null) {
+            throw new ApiException("Review not found");
         }
 
-    //41
-    public String reviewOpportunity(Integer opportunityId, Integer schoolId, Review review) {
-        List<StudentOpportunityRequest> requests = studentOpportunityRequestRepository.findCompletedRequestsForOpportunity(opportunityId, schoolId);
-
-        if (requests.isEmpty()) {
-            return "You cannot rate this opportunity because it is not associated with a student from the school or has not yet been completed.";
+        if (!oldReview.getSchool().getId().equals(schoolId)) {
+            throw new ApiException("You are not authorized to delete this review");
         }
 
-        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
-        if (opportunity == null) {
-        throw new ApiException("Opportunity not found");}
-
-        review.setOpportunity(opportunity);
-        review.setCreatedAt(LocalDateTime.now());
-
-        reviewRepository.save(review);
-
-        return "review added successfully";
+        reviewRepository.delete(oldReview);
     }
 
     //36
@@ -164,15 +154,6 @@ public class ReviewService {
 
 
 }
-//    public void updateReview(Integer reviewId, Review review) {
-//        Review oldReview = reviewRepository.findReviewById(reviewId);
-//        if (oldReview == null) {
-//            throw new ApiException("Review not found");
-//        }
-//        oldReview.setRating(review.getRating());
-//        oldReview.setCreatedAt(LocalDateTime.now());
-//        reviewRepository.save(oldReview);
-//    }
 
 
 

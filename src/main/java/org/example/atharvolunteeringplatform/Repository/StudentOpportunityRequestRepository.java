@@ -25,7 +25,7 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
 
 
 
-    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'Completed'")
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.opportunity.organization.id = ?1 AND r.status = 'completed'")
     List<StudentOpportunityRequest> findCompletedByOrganizationId(Integer organizationId);
 
 
@@ -64,5 +64,8 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
     List<StudentOpportunityRequest> findAllBySchoolId(Integer schoolId);
 
     boolean existsByStudentAndOpportunity(Student student, Opportunity opportunity);
+
+    @Query("SELECT r FROM StudentOpportunityRequest r WHERE r.student.id = :studentId AND r.opportunity.id = :opportunityId")
+    StudentOpportunityRequest findRequestByStudentIdAndOpportunityId(Integer studentId, Integer opportunityId);
 
 }

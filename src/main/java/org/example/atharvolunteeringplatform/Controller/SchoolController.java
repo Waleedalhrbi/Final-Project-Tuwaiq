@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/school")
@@ -88,16 +89,32 @@ public class SchoolController {
         return ResponseEntity.status(HttpStatus.OK).body(studentRequests);
     }
 
-    @PutMapping("/update-request-status/{requestId}/{status}")
-    public ResponseEntity<Void> updateOpportunityRequestStatus(/* @AuthenticationPrincipal*/ MyUser user, @PathVariable Integer requestId, @PathVariable String status) {
-
-
-        schoolService.updateOpportunityRequestStatus(user.getId(), requestId, status);
-
-
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PutMapping("/accept/{requestId}")
+    public ResponseEntity<String> acceptRequest(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable Integer requestId) {
+        schoolService.acceptOrRejectRequest(user.getId(), requestId, "accepted");
+        return ResponseEntity.ok("Request accepted successfully");
     }
 
+    @PutMapping("/reject/{requestId}")
+    public ResponseEntity<String> rejectRequest(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable Integer requestId) {
+        schoolService.acceptOrRejectRequest(user.getId(), requestId, "rejected");
+        return ResponseEntity.ok("Request rejected successfully");
+    }
+
+
+
+    @PutMapping("/students/{studentId}/active")
+    public ResponseEntity<String> approveStudent(@PathVariable Integer studentId) {
+        schoolService.approveStudentAccount(studentId);
+        return ResponseEntity.ok("Student account Activated successfully");
+    }
+
+    //43
+    @PostMapping("/notify-non-volunteering/{studentId}")
+    public ResponseEntity<String> notifyNonVolunteeringStudent(@PathVariable Integer studentId) {
+        schoolService.notifyNonVolunteeringStudent(studentId);
+        return ResponseEntity.ok("Email send successfully");
+    }
 
     //46
     @PutMapping("/students/reject/{studentId}")
@@ -105,4 +122,18 @@ public class SchoolController {
         schoolService.rejectStudentAccount(studentId);
         return ResponseEntity.ok("Student account has been rejected.");
     }
+
+    //50
+    @GetMapping("/students/details/{studentId}")
+    public ResponseEntity  getStudentDetails(@PathVariable Integer studentId) {
+        Map<String, Object> response = schoolService.getStudentDetailsResponse(studentId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/activate/{id}")
+    public ResponseEntity<String> activateSchool(@PathVariable Integer id) {
+        schoolService.activateSchool(id);
+        return ResponseEntity.ok("School account activated successfully");
+    }
+
 }

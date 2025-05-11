@@ -42,8 +42,8 @@ public class OpportunityService {
             throw new ApiException("Organization not found");
         }
 
-        if (organization.getStatus().equalsIgnoreCase("InActive")) {
-            throw new ApiException("Organization status is InActive");
+        if (organization.getStatus().equals("Inactive")) {
+            throw new ApiException("Organization status is Inactive");
         }
 
         opportunity.setTitle(opportunity.getTitle());
@@ -194,7 +194,12 @@ public class OpportunityService {
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
-
+        if (opportunity.getStatus().equals("accepted")) {
+            throw new ApiException("Opportunity is already accepted");
+        }
+        if (opportunity.getStatus().equals("rejected")) {
+            throw new ApiException("Opportunity is already rejected and cannot be accepted");
+        }
         opportunity.setStatus("accepted");
         opportunityRepository.save(opportunity);
 
@@ -209,6 +214,13 @@ public class OpportunityService {
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
+        }
+
+        if (opportunity.getStatus().equals("accepted")) {
+            throw new ApiException("Opportunity is already accepted");
+        }
+        if (opportunity.getStatus().equals("rejected")) {
+            throw new ApiException("Opportunity is already rejected and cannot be accepted");
         }
 
         opportunity.setStatus("accepted");
@@ -227,6 +239,12 @@ public class OpportunityService {
             throw new ApiException("Opportunity not found");
         }
 
+        if (opportunity.getStatus().equals("rejected")) {
+            throw new ApiException("Opportunity is already rejected");
+        }
+        if (opportunity.getStatus().equals("accepted")) {
+            throw new ApiException("Opportunity is already accepted and cannot be rejected");
+        }
         opportunity.setStatus("rejected");
         opportunityRepository.save(opportunity);
 
@@ -242,7 +260,12 @@ public class OpportunityService {
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
-
+        if (opportunity.getStatus().equals("rejected")) {
+            throw new ApiException("Opportunity is already rejected");
+        }
+        if (opportunity.getStatus().equals("accepted")) {
+            throw new ApiException("Opportunity is already accepted and cannot be rejected");
+        }
         opportunity.setStatus("rejected");
         opportunityRepository.save(opportunity);
 

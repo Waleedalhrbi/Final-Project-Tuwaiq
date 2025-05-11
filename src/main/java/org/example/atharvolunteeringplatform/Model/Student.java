@@ -48,7 +48,7 @@ public class Student {
     private String gender;
 
 
-    @Pattern(regexp = "^(Active|Inactive)$", message = "Status must be one of: Pending, Active, Inactive")
+    @Pattern(regexp = "^(Active|Inactive)$", message = "Status must be one of: Active, Inactive")
     @Column(columnDefinition = "varchar(10)")
     private String status;
 

@@ -2,6 +2,7 @@ package org.example.atharvolunteeringplatform.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Model.Review;
@@ -24,19 +25,24 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
 
-    @PostMapping("/add")
-    public ResponseEntity addReview(@RequestParam Integer opportunityId, @RequestParam Integer studentId,/*@AuthenticationPrincipal*/ @RequestParam Integer supervisorId,@RequestBody @Valid Review review) {
-        reviewService.addReview(opportunityId,studentId,review,supervisorId);
-        return ResponseEntity.ok("Review added successfully");
+    @PostMapping("/add-review/opportunity/{opportunityId}/school/{schoolId}")
+    public ResponseEntity addReview(@PathVariable Integer opportunityId, @PathVariable Integer schoolId/*@AuthenticationPrincipal*/,@RequestBody @Valid Review review) {
+        reviewService.createReview(review, schoolId, opportunityId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Review added successfully"));
     }
 
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteReview(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteReview(@PathVariable Integer id) {
         reviewService.deleteReview(id);
-        return ResponseEntity.ok("Review deleted successfully");
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Review deleted successfully"));
     }
 
+    @DeleteMapping("/delete/{reviewId}/schoolId")
+    public ResponseEntity<?> schoolDeleteReview(@PathVariable Integer reviewId, @PathVariable Integer schoolId) {
+        reviewService.schoolDeleteReview(reviewId,schoolId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Review deleted successfully"));
+    }
 
     //36
     @GetMapping("/get-review/{opportunityId}/organization/{organizationId}")
@@ -46,13 +52,6 @@ public class ReviewController {
             return ResponseEntity.ok().body("No review found");
         }
         return ResponseEntity.ok(review);
-    }
-
-    //41
-    @PostMapping("/review/{opportunityId}/school/{schoolId}")
-    public ResponseEntity<String> evaluateOpportunity(@PathVariable Integer opportunityId, /*@AuthenticationPrincipal*/@PathVariable Integer schoolId, @RequestBody @Valid Review review) {
-        return ResponseEntity.ok().body(reviewService.reviewOpportunity(opportunityId, schoolId,review));
-
     }
 
     @GetMapping("/organization/average-rating")
