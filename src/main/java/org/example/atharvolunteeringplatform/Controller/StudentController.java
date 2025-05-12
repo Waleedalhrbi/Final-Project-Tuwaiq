@@ -13,6 +13,7 @@ import org.example.atharvolunteeringplatform.Service.StudentOpportunityRequestSe
 import org.example.atharvolunteeringplatform.Service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,56 +26,65 @@ public class StudentController {
 
     private final StudentService studentService;
     private final StudentOpportunityRequestService studentOpportunityRequestService;
+
+   //admin
     @GetMapping("/get-all")
     public ResponseEntity getAllStudents() {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getAllStudents());
     }
 
+    //student
     @PostMapping("/add")
     public ResponseEntity addStudent(@RequestBody @Valid StudentDTO studentDTO) {
         studentService.addStudent(studentDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student added successfully"));
     }
 
+    //student
     @PutMapping("/update")
-    public ResponseEntity updateStudent(/*@AuthenticationPrincipal*/ MyUser myUser, @RequestBody @Valid StudentDTO studentDTO) {
+    public ResponseEntity updateStudent(@AuthenticationPrincipal MyUser myUser, @RequestBody @Valid StudentDTO studentDTO) {
         studentService.updateStudent(myUser.getId(), studentDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student updated successfully"));
     }
 
+    //admin
     @DeleteMapping("/delete/{studentID}")
     public ResponseEntity deleteStudent(@PathVariable Integer studentID) {
         studentService.deleteStudent(studentID);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Student deleted successfully"));
     }
 
+    //student
     @GetMapping("/opportunities-by-hours")
     public ResponseEntity getOpportunitiesSortedByHours() {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesSortedByHours());
     }
 
+    //student
     @GetMapping("/opportunities-by-date/{from}/{to}")
     public ResponseEntity getOpportunitiesByDateRange(@PathVariable LocalDate from, @PathVariable LocalDate to) {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getOpportunitiesByDateRange(from, to));
     }
 
+    //student
     @GetMapping("/my-requests")
-    public ResponseEntity getMyRequests(/*@AuthenticationPrincipal*/ MyUser user) {
+    public ResponseEntity getMyRequests(@AuthenticationPrincipal MyUser user) {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getMyRequests(user.getId()));
     }
 
 
 
-
+    //student
     @GetMapping("/completed-opportunities")
-    public ResponseEntity getCompletedOpportunities(/*@AuthenticationPrincipal*/ MyUser user) {
+    public ResponseEntity getCompletedOpportunities(@AuthenticationPrincipal MyUser user) {
 
         return ResponseEntity.ok(studentOpportunityRequestService.getCompletedOpportunitiesByStudent(user.getId()));
     }
 
 
+    //student
     @GetMapping("/hours-summary")
-    public ResponseEntity<?> getHoursSummary(/*@AuthenticationPrincipal*/ MyUser user) {
+    public ResponseEntity<?> getHoursSummary(@AuthenticationPrincipal MyUser user) {
         return ResponseEntity.ok(studentService.getStudentHoursSummary(user.getId()));
     }
 
@@ -82,7 +92,7 @@ public class StudentController {
     //44
     //for supervisor
     @GetMapping("/students-Inactive")
-    public ResponseEntity<List<Student>> getInactiveStudents(/*@AuthenticationPrincipal*/ MyUser user) {
+    public ResponseEntity<List<Student>> getInactiveStudents(@AuthenticationPrincipal MyUser user) {
         List<Student> pendingStudents = studentService.getInactiveStudents(user.getId());
         return ResponseEntity.ok(pendingStudents);
     }

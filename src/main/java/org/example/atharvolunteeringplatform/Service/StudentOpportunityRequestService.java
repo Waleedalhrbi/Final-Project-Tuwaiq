@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -80,17 +81,33 @@ public class StudentOpportunityRequestService {
     }
 
     //10
-    public List<OpportunityDTO> getOpportunitiesByRequestStatus(Integer studentId, String status) {
-
-        //نتحقق من ان الطالب مقدم على فرصه
-        boolean hasRequests = studentOpportunityRequestRepository.existsByStudentId(studentId);
-        if (!hasRequests) {
-            throw new ApiException("There are no volunteer opportunities offered by the student.");
+    public List<OpportunityDTO> getOpportunitiesByRequestStatus(Integer userId, String status) {
+        // التحقق من صحة الحالة
+        List<String> validStatuses = Arrays.asList("pending", "rejected", "approved", "progress", "completed", "incomplete");
+        if (!validStatuses.contains(status.toLowerCase())) {
+            throw new ApiException("Invalid status. Must be one of: " + validStatuses);
         }
 
-        // استخرج الطلبات حسب الحالة
-        List<StudentOpportunityRequest> requests = studentOpportunityRequestRepository.findByStudentIdAndStatus(studentId, status);
+        // جلب الطالب من خلال userId
+        Student student = studentRepository.findStudentById(userId);
+        if (student == null) {
+            throw new ApiException("Student not found.");
+        }
 
+        // التحقق من أن لديه طلبات
+        if (!studentOpportunityRequestRepository.existsByStudentId(student.getId())) {
+            throw new ApiException("You have not submitted any volunteer requests.");
+        }
+
+        // جلب الطلبات بالحالة المطلوبة
+        List<StudentOpportunityRequest> requests =
+                studentOpportunityRequestRepository.findByStudentIdAndStatus(student.getId(), status.toLowerCase());
+
+        if (requests.isEmpty()) {
+            throw new ApiException("There are no results for this status.");
+        }
+
+        // تحويل النتائج إلى DTO
         List<OpportunityDTO> dtoList = new ArrayList<>();
         for (StudentOpportunityRequest request : requests) {
             dtoList.add(new OpportunityDTO(request.getOpportunity()));
@@ -99,19 +116,33 @@ public class StudentOpportunityRequestService {
     }
 
     //31
-    public void approveRequestByOrganization(Integer requestId, Integer organizationId) {
+    public void approveOrRejectRequestByOrganization(Integer requestId, Integer organizationId, String status) {
         StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
-        if(request==null){
-            throw  new ApiException("Request not found");
+        if (request == null) {
+            throw new ApiException("Request not found");
         }
+
         Opportunity opportunity = request.getOpportunity();
 
-//التحقق من ان الجهه هي نفس الجهه التي قدم عليها الطالب
+        // التحقق من أن الجهة هي نفسها المقدمة للفرصة
         if (!opportunity.getOrganization().getId().equals(organizationId)) {
-            throw new ApiException("You are not allowed to approve this request");
+            throw new ApiException("You are not allowed to modify this request");
         }
 
-        request.setOrganization_status("approved");
+        // تعيين حالة الجهة
+        request.setOrganization_status(status.toLowerCase());
+
+        // في حالة الرفض، نرفض مباشرة
+        if (status.equalsIgnoreCase("rejected")) {
+            request.setStatus("rejected");
+        }
+        // في حالة القبول، نتحقق هل المشرف وافق أيضاً؟
+        else if (status.equalsIgnoreCase("approved") &&
+                "approved".equalsIgnoreCase(request.getSupervisor_status())) {
+            request.setStatus("approved");
+            request.setApproved_at(LocalDateTime.now());
+        }
+
         studentOpportunityRequestRepository.save(request);
     }
 

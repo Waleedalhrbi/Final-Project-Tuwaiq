@@ -150,22 +150,31 @@ public class SchoolService {
         assignBadgeIfEligible(student);
     }
 
-    public void approveStudentAccount(Integer studentId) {
+    public void approveStudentAccount(Integer studentId, Integer schoolId) {
         Student student = studentRepository.findStudentById(studentId);
         if (student == null || (!student.getStatus().equalsIgnoreCase("Inactive") && !student.getStatus().equals("Pending"))) {
             throw new ApiException("Student not found or already approved/rejected");
+        }
+
+        if (!student.getSchool().getId().equals(schoolId)) {
+            throw new ApiException("Unauthorized: You can only approve students from your own school");
         }
 
         student.setStatus("Active");
         studentRepository.save(student);
     }
 
-    public void rejectStudentAccount(Integer studentId) {
+
+    public void rejectStudentAccount(Integer studentId, Integer schoolId) {
         Student student = studentRepository.findStudentById(studentId);
         if (student == null) throw new ApiException("Student not found");
 
-        if (!student.getStatus().equals("Pending") && !student.getStatus().equals("Inactive")) {
-            throw new ApiException("The account is already rejected");
+        if (!student.getSchool().getId().equals(schoolId)) {
+            throw new ApiException("Unauthorized: You can only reject students from your own school");
+        }
+
+        if (!student.getStatus().equalsIgnoreCase("Pending") && !student.getStatus().equalsIgnoreCase("Inactive")) {
+            throw new ApiException("The account is already rejected or active");
         }
 
         student.setStatus("Rejected");
@@ -183,7 +192,7 @@ public class SchoolService {
         String subject;
         String body;
 
-        if (status.equalsIgnoreCase("accepted")) {
+        if (status.equalsIgnoreCase("approved")) {
             subject = "تم قبول طلب التطوع الخاص بك";
             body = "نود إبلاغك بأنه تم قبول طلبك للتطوع في الفرصة التالية:\n\n" +
                     "عنوان الفرصة: " + opportunityTitle + "\n" +
@@ -243,9 +252,29 @@ public class SchoolService {
                 request.getOpportunity().getEndDate());
     }
 
-    public Map<String, Object> getStudentDetailsResponse(Integer studentId) {
+    public Map<String, Object> getStudentDetailsResponse(Integer studentId, MyUser currentUser) {
+
+        if (!currentUser.getRole().equalsIgnoreCase("supervisor")) {
+            throw new ApiException("Access denied: Only supervisors can view this information");
+        }
+
+
+        School supervisorSchool = schoolRepository.findSchoolById(currentUser.getId());
+        if (supervisorSchool == null) {
+            throw new ApiException("Supervisor's school not found");
+        }
+
+
         Student student = studentRepository.findStudentById(studentId);
-        if (student == null) throw new ApiException("Student not found");
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+
+
+        if (!student.getSchool().getId().equals(supervisorSchool.getId())) {
+            throw new ApiException("Access denied: Student does not belong to your school");
+        }
+
 
         Map<String, Object> response = new HashMap<>();
         response.put("id", student.getId());
@@ -273,9 +302,16 @@ public class SchoolService {
         schoolRepository.save(school);
     }
 
-    public void notifyNonVolunteeringStudent(Integer studentId) {
+    public void notifyNonVolunteeringStudent(Integer studentId, Integer schoolId) {
         Student student = studentRepository.findStudentById(studentId);
-        if (student == null) throw new ApiException("Student not found");
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+
+
+        if (!student.getSchool().getId().equals(schoolId)) {
+            throw new ApiException("Unauthorized: You can only notify students from your own school");
+        }
 
         if (student.getTotal_hours() != 0) {
             throw new ApiException("Student already has volunteering hours");
@@ -296,6 +332,7 @@ public class SchoolService {
 
         sendDecisionEmail(to, subject, body);
     }
+
 
     public void sendDecisionEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();

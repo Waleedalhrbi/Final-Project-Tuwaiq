@@ -5,10 +5,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.DTO.OpportunityDTO;
+import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Service.StudentOpportunityRequestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,17 +22,20 @@ public class StudentOpportunityRequestController {
 
     private final StudentOpportunityRequestService studentOpportunityRequestService;
 
+    //admin
     @GetMapping("/get-all")
     public ResponseEntity getAllRequests() {
         return ResponseEntity.status(HttpStatus.OK).body(studentOpportunityRequestService.getAllRequests());
     }
 
-    @PostMapping("/request/{studentId}/{opportunityId}")
-    public ResponseEntity requestOpportunity(@PathVariable Integer studentId, @PathVariable Integer opportunityId, @Valid @RequestBody StudentOpportunityRequest studentOpportunityRequest) {
-        studentOpportunityRequestService.RequestOpportunity(studentId, opportunityId, studentOpportunityRequest);
+    //student
+    @PostMapping("/request/{opportunityId}")
+    public ResponseEntity requestOpportunity(@PathVariable Integer opportunityId, @AuthenticationPrincipal MyUser myUser ,@Valid @RequestBody StudentOpportunityRequest studentOpportunityRequest) {
+        studentOpportunityRequestService.RequestOpportunity(myUser.getId(), opportunityId, studentOpportunityRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Opportunity request submitted successfully"));
     }
 
+    //admin
     @DeleteMapping("/delete/{requestId}")
     public ResponseEntity deleteOpportunityRequest(@PathVariable Integer requestId) {
         studentOpportunityRequestService.deleteOpportunityRequest(requestId);
@@ -38,22 +43,28 @@ public class StudentOpportunityRequestController {
     }
 
     //10
-    @GetMapping("/student/opportunities/filter")
-    public ResponseEntity getStudentOpportunitiesByStatus(/*@AuthenticationPrincipal Student Student*/@RequestParam Integer studentId, @RequestParam String status) {
-        List<OpportunityDTO> opportunities = studentOpportunityRequestService.getOpportunitiesByRequestStatus(studentId, status);
-        if(opportunities.isEmpty()) {
-            return ResponseEntity.ok().body("There are no results for this data.");
-        }
-        return ResponseEntity.ok(opportunities);
+    //student
+    @GetMapping("/student/opportunities/filter/{status}")
+    public ResponseEntity<?> getStudentOpportunitiesByStatus(@PathVariable String status, @AuthenticationPrincipal MyUser myUser) {
+        return ResponseEntity.ok(studentOpportunityRequestService.getOpportunitiesByRequestStatus(myUser.getId(), status));
     }
+
 
     //31
-    @PutMapping("/approve/{requestId}/organization/{organizationId}")
-    public ResponseEntity approveRequestByOrganization(@PathVariable Integer requestId, /*@AuthenticationPrincipal Student Student*/@PathVariable Integer organizationId) {
-
-        studentOpportunityRequestService.approveRequestByOrganization(requestId, organizationId);
+    //organization
+    @PutMapping("/approve-request/{requestId}")
+    public ResponseEntity<?> approveRequestByOrganization(@PathVariable Integer requestId, @AuthenticationPrincipal MyUser myUser) {
+        studentOpportunityRequestService.approveOrRejectRequestByOrganization(requestId, myUser.getId(), "approved");
         return ResponseEntity.ok("Request approved successfully by organization");
     }
+
+    //organization
+    @PutMapping("/reject-request/{requestId}/")
+    public ResponseEntity<?> rejectRequestByOrganization(@PathVariable Integer requestId, @AuthenticationPrincipal MyUser myUser) {
+        studentOpportunityRequestService.approveOrRejectRequestByOrganization(requestId, myUser.getId(), "rejected");
+        return ResponseEntity.ok("Request rejected successfully by organization");
+    }
+
 
 
 
