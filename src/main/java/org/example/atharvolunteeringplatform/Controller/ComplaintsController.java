@@ -56,6 +56,7 @@ public class ComplaintsController {
     @GetMapping("/complaints")
     public ResponseEntity<List<Complaint>> getMyComplaints(/*@AuthenticationPrincipal*/ MyUser user) {
         return ResponseEntity.status(HttpStatus.OK).body(complaintsService.getComplaintsByStudentId(user.getId()));
+
     }
 
 
@@ -79,6 +80,7 @@ public class ComplaintsController {
     public ResponseEntity<String> updateComplaintStatus(@PathVariable Integer id, @RequestParam String status) {
         complaintsService.updateComplaintStatus(id, status);
         return ResponseEntity.ok("Complaint status updated successfully");
+
     }
 
 

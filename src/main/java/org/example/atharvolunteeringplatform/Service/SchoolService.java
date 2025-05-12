@@ -181,9 +181,11 @@ public class SchoolService {
             throw new ApiException("Invalid status. Must be 'completed' or 'incomplete'");
         }
 
+
         if (request.getStatus().equalsIgnoreCase(status)) {
             throw new ApiException("Request already "+status);
         }
+
 
         if (status.equalsIgnoreCase("completed") && !request.getStatus().equalsIgnoreCase("completed")) {
 
@@ -195,6 +197,7 @@ public class SchoolService {
         request.setStatus(status.toLowerCase());
         studentOpportunityRequestRepository.save(request);
         studentRepository.save(student);
+
         assignBadgeIfEligible(student);
     }
 
@@ -208,6 +211,11 @@ public class SchoolService {
         student.setStatus("Active");
         studentRepository.save(student);
     }
+
+    }
+
+
+
 
     //46
     public void rejectStudentAccount(Integer studentId) {

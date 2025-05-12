@@ -109,6 +109,7 @@ public class SchoolController {
         return ResponseEntity.ok("Student account Activated successfully");
     }
 
+
     //43
     @PostMapping("/notify-non-volunteering/{studentId}")
     public ResponseEntity<String> notifyNonVolunteeringStudent(@PathVariable Integer studentId) {
@@ -116,12 +117,14 @@ public class SchoolController {
         return ResponseEntity.ok("Email send successfully");
     }
 
+
     //46
     @PutMapping("/students/reject/{studentId}")
     public ResponseEntity<String> rejectStudent(@PathVariable Integer studentId) {
         schoolService.rejectStudentAccount(studentId);
         return ResponseEntity.ok("Student account has been rejected.");
     }
+
 
     //50
     @GetMapping("/students/details/{studentId}")
@@ -135,5 +138,6 @@ public class SchoolController {
         schoolService.activateSchool(id);
         return ResponseEntity.ok("School account activated successfully");
     }
+
 
 }

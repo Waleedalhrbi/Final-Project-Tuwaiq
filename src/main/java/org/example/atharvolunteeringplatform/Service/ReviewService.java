@@ -52,7 +52,6 @@ public class ReviewService {
     }
 
 
-
     public void deleteReview(Integer reviewId) {
 
         Review oldReview = reviewRepository.findReviewById(reviewId);
@@ -154,7 +153,3 @@ public class ReviewService {
 
 
 }
-
-
-
-

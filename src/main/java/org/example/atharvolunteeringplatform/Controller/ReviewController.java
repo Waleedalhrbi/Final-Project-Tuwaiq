@@ -25,6 +25,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
 
+
     @PostMapping("/add-review/opportunity/{opportunityId}/school/{schoolId}")
     public ResponseEntity addReview(@PathVariable Integer opportunityId, @PathVariable Integer schoolId/*@AuthenticationPrincipal*/,@RequestBody @Valid Review review) {
         reviewService.createReview(review, schoolId, opportunityId);
@@ -63,6 +64,7 @@ public class ReviewController {
     public ResponseEntity getOrganizationReviewCount(/*@AuthenticationPrincipal*/ Organization organization) {
         return ResponseEntity.ok(reviewService.getReviewCount(organization));
     }
+
 
     @GetMapping("/opportunity/{opportunityId}/average-rating")
     public ResponseEntity getOpportunityAverageRating(@PathVariable Integer opportunityId, /*@AuthenticationPrincipal*/ Organization organization) {
