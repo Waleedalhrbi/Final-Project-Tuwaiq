@@ -1,9 +1,7 @@
 package org.example.atharvolunteeringplatform.DTO;
 
 import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +10,12 @@ import lombok.Setter;
 public class SchoolDTO {
 
 //User
+
+    @NotNull(message = "Username cannot be null")
+    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
+    private String username;
+
+
     @Column(nullable = false)
     @NotEmpty(message = "Name cannot be Empty")
     private String name;

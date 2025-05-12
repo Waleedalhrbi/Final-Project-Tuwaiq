@@ -2,28 +2,36 @@ package org.example.atharvolunteeringplatform.Model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Entity
 @NoArgsConstructor
-public class MyUser {
+public class MyUser implements UserDetails {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull(message = "Username cannot be null")
+    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
+    @Column(columnDefinition = "varchar(20) not null UNIQUE")
+    private String username;
 
     @NotEmpty(message = "Please enter the student name")
     @Size(min = 2, max = 50, message = "Student name must be between 2 and 50 characters")
@@ -65,4 +73,32 @@ public class MyUser {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "myUser")
     @PrimaryKeyJoinColumn
     private School school;
+
+
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(this.role));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

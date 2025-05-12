@@ -14,6 +14,10 @@ public class StudentDTO {
     private Integer id;
 
     // User
+    @NotNull(message = "Username cannot be null")
+    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
+    private String username;
+
     @NotEmpty(message = "Please enter the student name")
     @Size(min = 2, max = 50, message = "Student name must be between 2 and 50 characters")
     private String name;
