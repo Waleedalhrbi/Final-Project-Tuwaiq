@@ -56,6 +56,8 @@ public class Opportunity {
     @NotEmpty(message = "Location is required")
     private String location;
 
+    @NotEmpty(message = "Image path is required")
+    private String imagePath;
 
     @Pattern(regexp = "^(open|pending|accepted|rejected|closed)$", message = "Status must be one of: open, pending, Completed, Rejected, Closed")
     private String status;

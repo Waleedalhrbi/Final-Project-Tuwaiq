@@ -1,5 +1,7 @@
 package org.example.atharvolunteeringplatform.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
@@ -9,6 +11,7 @@ import org.example.atharvolunteeringplatform.Service.OpportunityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,10 +28,20 @@ public class OpportunityController {
         return ResponseEntity.status(HttpStatus.OK).body(opportunityService.findAllOpportunities());
     }
 
-    @PostMapping("/add/{organizationId}")
-    public ResponseEntity addOpportunity(@RequestBody @Valid Opportunity opportunity,/*@AuthenticationPrincipal*/ @PathVariable Integer organizationId) {
-        opportunityService.createOpportunity(opportunity,organizationId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity added successfully and pending approval"));
+    @PostMapping(value = "/create", consumes = "multipart/form-data")
+    public ResponseEntity<?> createOpportunity(@RequestPart("opportunity") String opportunityJson,
+                                               @RequestParam("organizationId") Integer organizationId,
+                                               @RequestPart("image") MultipartFile imageFile) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Opportunity opportunity;
+        try {
+            opportunity = objectMapper.readValue(opportunityJson, Opportunity.class);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid JSON format in 'opportunity'");
+        }
+
+        opportunityService.createOpportunity(opportunity, organizationId, imageFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Opportunity created successfully");
     }
 
     @PutMapping("/update/{opportunityId}/{organizationId}")

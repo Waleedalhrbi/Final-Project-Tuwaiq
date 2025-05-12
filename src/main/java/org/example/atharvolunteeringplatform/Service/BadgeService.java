@@ -22,7 +22,7 @@ public class BadgeService {
     private final BadgeRepository badgeRepository;
 
 
-    private final String uploadDir = "uploads/badges/";
+    private final String uploadDir = "src/main/resources/static/uploads/badges/";
 
     public List<Badge> findBadges() {
         return badgeRepository.findAll();
@@ -51,7 +51,7 @@ public class BadgeService {
             Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Save the relative image path to the badge entity
-            badge.setImagePath(uploadDir + fileName);
+            badge.setImagePath("/uploads/badges/" + fileName); // ✅ only the URL path
 
             // Save the badge entity to the database
             badgeRepository.save(badge);
