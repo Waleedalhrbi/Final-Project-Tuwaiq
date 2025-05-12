@@ -5,10 +5,6 @@ import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
 import org.example.atharvolunteeringplatform.Model.*;
 import org.example.atharvolunteeringplatform.Repository.*;
-import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
-import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
-
-import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,10 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,104 +25,78 @@ public class SchoolService {
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     private final JavaMailSender mailSender;
 
-
     public List<School> getAllSchool() {
         return schoolRepository.findAll();
     }
 
-
     public void addSchool(SchoolDTO schoolDTO) {
-
         MyUser myUser = new MyUser();
         myUser.setName(schoolDTO.getName());
         myUser.setEmail(schoolDTO.getEmail());
         myUser.setPhone_number(schoolDTO.getPhoneNumber());
         myUser.setPassword(schoolDTO.getPassword());
-
-
-
         myUser.setRole("supervisor");
         myUser.setCreated_at(LocalDateTime.now());
         myUserRepository.save(myUser);
-
 
         School school = new School();
         school.setName(schoolDTO.getName());
         school.setCity(schoolDTO.getCity());
         school.setRegion(schoolDTO.getRegion());
         school.setSupervisorName(schoolDTO.getSupervisorName());
-         school.setGender(schoolDTO.getGender());
-         school.setStatus("Pending");
-         school.setMyUser(myUser);
+        school.setGender(schoolDTO.getGender());
+        school.setStatus("Pending");
+        school.setMyUser(myUser);
 
         schoolRepository.save(school);
     }
 
-    public void updateSchool(Integer schoolId, SchoolDTO schoolDTO ) {
+    public void updateSchool(Integer schoolId, SchoolDTO schoolDTO) {
         MyUser oldUser = myUserRepository.findMyUserById(schoolId);
-        if (oldUser == null) {
-            throw new ApiException("School not found");
-        }
+        if (oldUser == null) throw new ApiException("School not found");
 
-        // التحقق من أن حالة المدرسة مفعلة
         if (!"Active".equalsIgnoreCase(schoolDTO.getStatus())) {
             throw new ApiException("School must be in 'Active' status to allow update");
         }
 
-
         School school = schoolRepository.findSchoolById(oldUser.getId());
-        if (school == null) {
-            throw new ApiException("School entity not found");
-        }
+        if (school == null) throw new ApiException("School entity not found");
 
         oldUser.setName(schoolDTO.getName());
         oldUser.setEmail(schoolDTO.getEmail());
         oldUser.setPhone_number(schoolDTO.getPhoneNumber());
         oldUser.setPassword(schoolDTO.getPassword());
         oldUser.setRole("supervisor");
-
-
         myUserRepository.save(oldUser);
-
 
         school.setRegion(schoolDTO.getRegion());
         school.setSupervisorName(schoolDTO.getSupervisorName());
         school.setCity(schoolDTO.getCity());
-        school.setStatus("Pending");//الى ان تحصل على الموافقه بالتعديل
+        school.setStatus("Pending");
 
         schoolRepository.save(school);
     }
 
     public void deleteSchool(Integer schoolId) {
         MyUser oldUser = myUserRepository.findMyUserById(schoolId);
-        if (oldUser == null) {
-            throw new ApiException("school not found");
-        }
+        if (oldUser == null) throw new ApiException("School not found");
 
         School school = schoolRepository.findSchoolById(oldUser.getId());
-        if (school != null) {
-            schoolRepository.delete(school);
-        }
+        if (school != null) schoolRepository.delete(school);
 
         myUserRepository.delete(oldUser);
     }
 
-    //38
-        public List<Student> getVolunteeringStudentsByGrade(String grade, Integer schoolID) {
-
+    public List<Student> getVolunteeringStudentsByGrade(String grade, Integer schoolID) {
         School school = schoolRepository.findSchoolById(schoolID);
-        if (school == null ){
-            throw new ApiException("School not found");
-        }
+        if (school == null) throw new ApiException("School not found");
 
-            return studentRepository.findVolunteeringStudentsByGradeAndSchoolId(grade,schoolID);
-        }
+        return studentRepository.findVolunteeringStudentsByGradeAndSchoolId(grade, schoolID);
+    }
 
     public List<StudentOpportunityRequest> getAllRequestsForStudent(Integer studentId, Integer schoolId) {
         Student student = studentRepository.findStudentById(studentId);
-        if (student == null) {
-            throw new ApiException("Student not found");
-        }
+        if (student == null) throw new ApiException("Student not found");
 
         if (!student.getSchool().getId().equals(schoolId)) {
             throw new ApiException("Unauthorized access");
@@ -138,58 +105,38 @@ public class SchoolService {
         return studentOpportunityRequestRepository.findAllByStudent_Id(studentId);
     }
 
-
-
-    //42
     public List<Student> getNonVolunteersByGradeForSchool(String gradeLevel, Integer schoolId) {
         School school = schoolRepository.findSchoolById(schoolId);
-        if (school == null) {
-            throw new ApiException("school not found");
-        }
+        if (school == null) throw new ApiException("School not found");
+
         return studentRepository.findNonVolunteersStudents(gradeLevel, schoolId);
     }
 
-
-
-
-
-    //40
     public void updateRequestStatus(Integer userId, Integer requestId, String status) {
         School school = schoolRepository.findSchoolById(userId);
-        if (school == null) {
-            throw new ApiException("School not found");
-        }
+        if (school == null) throw new ApiException("School not found");
 
         StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
-        if (request == null) {
-            throw new ApiException("Request not found");
-        }
-
+        if (request == null) throw new ApiException("Request not found");
 
         Student student = request.getStudent();
         if (!student.getSchool().getId().equals(school.getId())) {
             throw new ApiException("This student does not belong to your school");
         }
 
-
         if (request.getOpportunity().getEndDate().isAfter(LocalDate.now())) {
             throw new ApiException("Cannot update status. Opportunity has not ended yet");
         }
-
 
         if (!status.equals("completed") && !status.equals("incomplete")) {
             throw new ApiException("Invalid status. Must be 'completed' or 'incomplete'");
         }
 
-
         if (request.getStatus().equalsIgnoreCase(status)) {
-            throw new ApiException("Request already "+status);
+            throw new ApiException("Request already " + status);
         }
 
-
         if (status.equalsIgnoreCase("completed") && !request.getStatus().equalsIgnoreCase("completed")) {
-
-
             Integer opportunityHours = request.getOpportunity().getHours();
             student.setTotal_hours(student.getTotal_hours() + opportunityHours);
         }
@@ -201,10 +148,9 @@ public class SchoolService {
         assignBadgeIfEligible(student);
     }
 
-    //45
     public void approveStudentAccount(Integer studentId) {
         Student student = studentRepository.findStudentById(studentId);
-        if (student == null || !student.getStatus().equalsIgnoreCase("Inactive") && !student.getStatus().equals("Pending")) {
+        if (student == null || (!student.getStatus().equalsIgnoreCase("Inactive") && !student.getStatus().equals("Pending"))) {
             throw new ApiException("Student not found or already approved/rejected");
         }
 
@@ -212,14 +158,9 @@ public class SchoolService {
         studentRepository.save(student);
     }
 
-
-    //46
     public void rejectStudentAccount(Integer studentId) {
         Student student = studentRepository.findStudentById(studentId);
-
-        if (student == null) {
-            throw new ApiException("Student not found");
-        }
+        if (student == null) throw new ApiException("Student not found");
 
         if (!student.getStatus().equals("Pending") && !student.getStatus().equals("Inactive")) {
             throw new ApiException("The account is already rejected");
@@ -229,21 +170,12 @@ public class SchoolService {
         studentRepository.save(student);
     }
 
-    //47
     public List<StudentOpportunityRequest> getStudentRequestsBySchoolUser(Integer userId) {
-
         School school = schoolRepository.findSchoolById(userId);
-
-        if (school == null) {
-            throw new ApiException("School not found");
-        }
-
+        if (school == null) throw new ApiException("School not found");
 
         return studentOpportunityRequestRepository.findAllBySchoolId(school.getId());
     }
-
-
-    //53
 
     public void sendVolunteerDecisionEmail(String to, String status, String opportunityTitle, String organizationName, String location, LocalDate startDate, LocalDate endDate) {
         String subject;
@@ -273,7 +205,6 @@ public class SchoolService {
         mailSender.send(message);
     }
 
-    //48
     public void acceptOrRejectRequest(Integer userId, Integer requestId, String status) {
         School school = schoolRepository.findSchoolById(userId);
         if (school == null) throw new ApiException("School not found");
@@ -290,43 +221,29 @@ public class SchoolService {
             throw new ApiException("Cannot update status. The opportunity has already ended");
         }
 
-
         request.setSupervisor_status(status.toLowerCase());
-
 
         if (status.equalsIgnoreCase("rejected")) {
             request.setStatus("rejected");
-        }
-
-        else if (status.equalsIgnoreCase("approved") && "approved".equalsIgnoreCase(request.getOrganization_status())) {
+        } else if (status.equalsIgnoreCase("approved") && "approved".equalsIgnoreCase(request.getOrganization_status())) {
             request.setStatus("approved");
             request.setApproved_at(LocalDateTime.now());
         }
 
         studentOpportunityRequestRepository.save(request);
 
-
         String email = student.getUserStudent().getEmail();
-        sendVolunteerDecisionEmail(
-                email,
-                request.getStatus(),
+        sendVolunteerDecisionEmail(email, request.getStatus(),
                 request.getOpportunity().getTitle(),
                 request.getOpportunity().getOrganization().getName(),
                 request.getOpportunity().getLocation(),
                 request.getOpportunity().getStartDate(),
-                request.getOpportunity().getEndDate()
-        );
+                request.getOpportunity().getEndDate());
     }
 
-
-
-    //50
     public Map<String, Object> getStudentDetailsResponse(Integer studentId) {
         Student student = studentRepository.findStudentById(studentId);
-        if (student == null){
-            throw new ApiException("Student not found");
-
-        }
+        if (student == null) throw new ApiException("Student not found");
 
         Map<String, Object> response = new HashMap<>();
         response.put("id", student.getId());
@@ -342,13 +259,9 @@ public class SchoolService {
         return response;
     }
 
-    //58
     public void activateSchool(Integer schoolId) {
         School school = schoolRepository.findSchoolById(schoolId);
-
-        if (school == null) {
-            throw new ApiException("School not found");
-        }
+        if (school == null) throw new ApiException("School not found");
 
         if ("Active".equalsIgnoreCase(school.getStatus())) {
             throw new ApiException("School is already active");
@@ -358,21 +271,15 @@ public class SchoolService {
         schoolRepository.save(school);
     }
 
-    //43
     public void notifyNonVolunteeringStudent(Integer studentId) {
         Student student = studentRepository.findStudentById(studentId);
-
-        if (student == null) {
-            throw new ApiException("Student not found");
-        }
+        if (student == null) throw new ApiException("Student not found");
 
         if (student.getTotal_hours() != 0) {
             throw new ApiException("Student already has volunteering hours");
         }
 
-        // التحقق من عدم وجود طلبات تطوع
         boolean hasRequests = studentOpportunityRequestRepository.existsByStudentId(studentId);
-
         if (hasRequests) {
             throw new ApiException("Student has already applied for a volunteering opportunity");
         }
@@ -388,7 +295,6 @@ public class SchoolService {
         sendDecisionEmail(to, subject, body);
     }
 
-
     public void sendDecisionEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -397,28 +303,13 @@ public class SchoolService {
         mailSender.send(message);
     }
 
-
     public void assignBadgeIfEligible(Student student) {
         Integer totalHours = student.getTotal_hours();
-
-        // كل البادجات المرتبة حسب الساعات المطلوبة (criteria)
         List<Badge> allBadges = badgeRepository.findAllByOrderByCriteriaAsc();
-
-        // البادجات اللي يملكها الطالب
         Set<Badge> ownedBadges = student.getBadges();
 
         for (Badge badge : allBadges) {
-            boolean alreadyOwned = false;
-
-            // نتحقق إذا الطالب يملك البادج
-            for (Badge owned : ownedBadges) {
-                if (owned.getId().equals(badge.getId())) {
-                    alreadyOwned = true;
-                    break;
-                }
-            }
-
-            // إذا استحق البادج وما يملكه، نضيفه
+            boolean alreadyOwned = ownedBadges.stream().anyMatch(b -> b.getId().equals(badge.getId()));
             if (totalHours >= badge.getCriteria() && !alreadyOwned) {
                 student.getBadges().add(badge);
             }

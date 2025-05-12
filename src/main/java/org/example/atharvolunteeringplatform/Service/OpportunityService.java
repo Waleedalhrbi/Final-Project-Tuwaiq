@@ -44,55 +44,56 @@ public class OpportunityService {
 
     private final String uploadDir = "src/main/resources/static/uploads/opportunities/";
 
-    public void createOpportunity(Opportunity opportunity, Integer organizationId, MultipartFile imageFile) {
-        Organization organization = organizationRepository.findOrganizationById(organizationId);
+  public void createOpportunity(Opportunity opportunity, Integer organizationId, MultipartFile imageFile) {
+    Organization organization = organizationRepository.findOrganizationById(organizationId);
 
-        if (organization == null) {
-            throw new ApiException("Organization not found");
-        }
-
-        if (organization.getStatus().equalsIgnoreCase("Inactive")) {
-            throw new ApiException("Organization status is Inactive");
-        }
-
-        if (imageFile == null || imageFile.isEmpty()) {
-            throw new ApiException("Image file is required");
-        }
-
-        String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-
-        try {
-            Path dirPath = Paths.get(uploadDir);
-            if (!Files.exists(dirPath)) {
-                Files.createDirectories(dirPath);
-            }
-
-            Path filePath = dirPath.resolve(fileName);
-            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Save correct public path
-            opportunity.setImagePath("/uploads/opportunities/" + fileName);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store image file", e);
-        }
-
-        opportunity.setTitle(opportunity.getTitle());
-        opportunity.setDescription(opportunity.getDescription());
-        opportunity.setLocation(opportunity.getLocation());
-        opportunity.setStatus("pending");
-        opportunity.setTypeOpportunity(opportunity.getTypeOpportunity());
-        opportunity.setHours(opportunity.getHours());
-        opportunity.setGender(opportunity.getGender());
-        opportunity.setStudentCapacity(opportunity.getStudentCapacity());
-        opportunity.setStartDate(opportunity.getStartDate());
-        opportunity.setEndDate(opportunity.getEndDate());
-        opportunity.setCreatedAt(LocalDateTime.now());
-
-        opportunity.setOrganization(organization);
-
-        opportunityRepository.save(opportunity);
+    if (organization == null) {
+        throw new ApiException("Organization not found");
     }
+
+    if (organization.getStatus().equalsIgnoreCase("Inactive")) {
+        throw new ApiException("Organization status is Inactive");
+    }
+
+    if (imageFile == null || imageFile.isEmpty()) {
+        throw new ApiException("Image file is required");
+    }
+
+    String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+
+    try {
+        Path dirPath = Paths.get(uploadDir);
+        if (!Files.exists(dirPath)) {
+            Files.createDirectories(dirPath);
+        }
+
+        Path filePath = dirPath.resolve(fileName);
+        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Save correct public path
+        opportunity.setImagePath("/uploads/opportunities/" + fileName);
+
+    } catch (IOException e) {
+        throw new RuntimeException("Failed to store image file", e);
+    }
+
+    opportunity.setTitle(opportunity.getTitle());
+    opportunity.setDescription(opportunity.getDescription());
+    opportunity.setLocation(opportunity.getLocation());
+    opportunity.setStatus("pending");
+    opportunity.setTypeOpportunity(opportunity.getTypeOpportunity());
+    opportunity.setHours(opportunity.getHours());
+    opportunity.setGender(opportunity.getGender());
+    opportunity.setStudentCapacity(opportunity.getStudentCapacity());
+    opportunity.setStartDate(opportunity.getStartDate());
+    opportunity.setEndDate(opportunity.getEndDate());
+    opportunity.setCreatedAt(LocalDateTime.now());
+
+    opportunity.setOrganization(organization);
+
+    opportunityRepository.save(opportunity);
+}
+
 
     public void updateOpportunity(Integer opportunityId,Integer organizationId, Opportunity updatedOpportunity) {
         Opportunity oldOpportunity = opportunityRepository.findOpportunityById(opportunityId);
