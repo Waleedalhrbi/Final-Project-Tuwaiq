@@ -2,6 +2,7 @@ package org.example.atharvolunteeringplatform.Service;
 
 import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.BaseFont;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.StudentDTO;
@@ -22,6 +23,7 @@ import org.example.atharvolunteeringplatform.Repository.StudentOpportunityReques
  
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -49,23 +51,28 @@ public class StudentService {
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @Transactional
     public void addStudent(StudentDTO studentDTO) {
 
         List<School> schools = schoolRepository.findAll();
+
+        // تشفير كلمة المرور قبل حفظها
+        String encodedPassword = passwordEncoder.encode(studentDTO.getPassword());
+
+        // إنشاء مستخدم جديد
         MyUser myUser = new MyUser();
         myUser.setName(studentDTO.getName());
         myUser.setUsername(studentDTO.getUsername());
         myUser.setEmail(studentDTO.getEmail());
         myUser.setPhone_number(studentDTO.getPhone_number());
-
-        myUser.setPassword(studentDTO.getPassword());
+        myUser.setPassword(encodedPassword);
         myUser.setRole("student");
         myUser.setCreated_at(LocalDateTime.now());
 
-
+        // حفظ المستخدم في قاعدة البيانات
         myUserRepository.save(myUser);
-
 
         Student student = new Student();
         student.setName(studentDTO.getName());
@@ -75,6 +82,7 @@ public class StudentService {
         student.setGender(studentDTO.getGender());
         student.setStatus("Inactive");
 
+        // البحث عن المدرسة المطابقة
         School matchedSchool = null;
         for (School school : schools) {
             if (school != null && school.getName() != null && studentDTO.getSchool_name().equalsIgnoreCase(school.getName())) {
@@ -83,23 +91,37 @@ public class StudentService {
             }
         }
 
+        // إذا لم يتم العثور على المدرسة
         if (matchedSchool == null) {
+            // نلغي عملية إضافة المستخدم إذا لم تكن المدرسة موجودة
+            myUserRepository.delete(myUser);  // حذف المستخدم من قاعدة البيانات
             throw new ApiException("School with name '" + studentDTO.getSchool_name() + "' not found");
         }
 
+        // إذا كانت المدرسة غير نشطة
         if (!"Active".equalsIgnoreCase(matchedSchool.getStatus())) {
+            // نلغي عملية إضافة المستخدم إذا كانت المدرسة غير نشطة
+            myUserRepository.delete(myUser);  // حذف المستخدم من قاعدة البيانات
             throw new ApiException("Cannot register student to a school that is not Active");
         }
 
+        // إذا كان الجنس غير متوافق
         if (!studentDTO.getGender().equalsIgnoreCase(matchedSchool.getGender())) {
+            // نلغي عملية إضافة المستخدم إذا كان الجنس غير متوافق
+            myUserRepository.delete(myUser);  // حذف المستخدم من قاعدة البيانات
             throw new ApiException("Student gender does not match the school's gender");
         }
 
+
         student.setSchool(matchedSchool);
 
+
         student.setUserStudent(myUser);
+
+
         studentRepository.save(student);
     }
+
 
     public void updateStudent(Integer studentId, StudentDTO studentDTO) {
         MyUser oldUser = myUserRepository.findMyUserById(studentId);
@@ -117,7 +139,7 @@ public class StudentService {
         oldUser.setUsername(studentDTO.getUsername());
         oldUser.setEmail(studentDTO.getEmail());
         oldUser.setPhone_number(studentDTO.getPhone_number());
-        oldUser.setPassword(studentDTO.getPassword());
+        oldUser.setPassword(passwordEncoder.encode(studentDTO.getPassword()));
         oldUser.setRole("student");
 
 
@@ -153,7 +175,12 @@ public class StudentService {
     public void deleteStudent(Integer studentId) {
         MyUser oldUser = myUserRepository.findMyUserById(studentId);
         if (oldUser == null) {
-            throw new ApiException("Student not found");
+            throw new ApiException("User not found");
+        }
+
+
+        if (!"student".equalsIgnoreCase(oldUser.getRole())) {
+            throw new ApiException("Only student accounts can be deleted by this endpoint");
         }
 
         Student student = studentRepository.findStudentById(oldUser.getId());

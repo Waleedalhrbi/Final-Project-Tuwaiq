@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.Model.*;
 import org.example.atharvolunteeringplatform.Repository.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -77,24 +78,20 @@ public class ReviewService {
     }
 
     //36
-    public List<Review> getOpportunityReviewsForOrganization(Integer opportunityId, Integer organizationId) {
-        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
-        if (opportunity==null){
-            throw new ApiException("Opportunity not found");
+    public List<Review> getReviewsForOpportunity(Integer opportunityId, Integer organizationId) {
+        List<Review> reviews = reviewRepository.findReviewsByOpportunityIdAndOrganizationId(opportunityId, organizationId);
+        if (reviews == null) {
+            throw new ApiException("reviews not found");
         }
-
-        if (!opportunity.getOrganization().getId().equals(organizationId)) {
-            throw new RuntimeException("You do not have access to view evaluations for this opportunity");
-        }
-
-        return reviewRepository.findByOpportunityId(opportunityId);
+        return reviews;
     }
 
 
-    public Double getAverageRating(Organization organization) {
-        List<Review> reviews = reviewRepository.findAllByOrganizationId(organization.getId());
 
-        if (reviews.isEmpty()) {
+    public Double getAverageRating(Integer organizationId) {
+        List<Review> reviews = reviewRepository.findAllByOrganizationId(organizationId);
+
+        if (reviews == null) {
             throw new ApiException("No reviews found for this organization");
         }
 
@@ -106,19 +103,19 @@ public class ReviewService {
         return total / reviews.size();
     }
 
-    public Integer getReviewCount(Organization organization) {
-        List<Review> reviews = reviewRepository.findAllByOrganizationId(organization.getId());
+    public Integer getReviewCount(Integer organizationId) {
+        List<Review> reviews = reviewRepository.findAllByOrganizationId(organizationId);
         return reviews.size();
     }
 
-    public Double getOpportunityAverageRating(Integer opportunityId, Organization organization) {
+    public Double getOpportunityAverageRating(Integer opportunityId, Integer organizationId) {
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
 
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
 
-        if (!opportunity.getOrganization().getId().equals(organization.getId())) {
+        if (!opportunity.getOrganization().getId().equals(organizationId)) {
             throw new ApiException("Access denied: not your opportunity");
         }
 
@@ -136,14 +133,14 @@ public class ReviewService {
         return sum / reviews.size();
     }
 
-    public Integer getReviewCountForOpportunity(Integer opportunityId, Organization organization) {
+    public Integer getReviewCountForOpportunity(Integer opportunityId, Integer organizationId) {
         Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
 
         if (opportunity == null) {
             throw new ApiException("Opportunity not found");
         }
 
-        if (!opportunity.getOrganization().getId().equals(organization.getId())) {
+        if (!opportunity.getOrganization().getId().equals(organizationId)) {
             throw new ApiException("Access denied: not your opportunity");
         }
 

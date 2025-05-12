@@ -1,5 +1,6 @@
 package org.example.atharvolunteeringplatform.Service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.OrganizationDTO;
@@ -11,10 +12,11 @@ import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
- 
+
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
- 
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,9 +31,9 @@ public class OrganizationService {
     private final MyUserRepository userRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     private final OpportunityRepository opportunityRepository;
- 
+
     private final MailSender mailSender;
- 
+
 
 
     public List<Organization> findAll() {
@@ -44,13 +46,15 @@ public class OrganizationService {
         user.setName(organizationDTO.getName());
         user.setUsername(organizationDTO.getUsername());
         user.setEmail(organizationDTO.getEmail());
-        user.setPassword(organizationDTO.getPassword());
+        String hashPassword = new BCryptPasswordEncoder().encode(organizationDTO.getPassword());
+        user.setPassword(hashPassword);
         user.setPhone_number(organizationDTO.getPhoneNumber());
         user.setRole("organization");
         user.setCreated_at(LocalDateTime.now());
 
         Organization organization = new Organization();
 
+        organization.setName(organizationDTO.getName());
         organization.setLicense(organizationDTO.getLicense());
         organization.setLocation(organizationDTO.getLocation());
         organization.setStatus("Inactive");
@@ -71,7 +75,9 @@ public class OrganizationService {
         oldUser.setUsername(organizationDTO.getUsername());
         oldUser.setEmail(organizationDTO.getEmail());
         oldUser.setPhone_number(organizationDTO.getPhoneNumber());
-        oldUser.setPassword(organizationDTO.getPassword());
+        String hashPassword = new BCryptPasswordEncoder().encode(organizationDTO.getPassword());
+        oldUser.setPassword(hashPassword);
+
         userRepository.save(oldUser);
 
         oldOrganization.setDescription(oldOrganization.getDescription());
@@ -96,7 +102,7 @@ public class OrganizationService {
         if (organization == null) {
             throw new ApiException("Organization not found");
         }
-         List<StudentOpportunityRequest> completedByOrganization = studentOpportunityRequestRepository.findCompletedByOrganizationId(organizationId);
+        List<StudentOpportunityRequest> completedByOrganization = studentOpportunityRequestRepository.findCompletedByOrganizationId(organizationId);
 
         int volunteersCount = 0;
         for (int i = 0; i < completedByOrganization.size(); i++) {
@@ -132,7 +138,7 @@ public class OrganizationService {
     }
 
 
- 
+
     //عرض طلبات التطوع المرسلة من قبل الطلاب : 30
     public List<StudentOpportunityRequest> getPendingRequestsByOrganization(Integer organizationId) {
         Organization organization = organizationRepository.findOrganizationById(organizationId);
@@ -276,5 +282,26 @@ public class OrganizationService {
 
         organization.setStatus("Active");
         organizationRepository.save(organization);
+    }
+
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @PostConstruct
+    public void createAdminUser() {
+        if (userRepository.findUserByUsername("admin") == null) {
+            MyUser admin = new MyUser();
+            admin.setName("Admin User");
+            admin.setUsername("admin");
+            admin.setEmail("admin@example.com");
+            admin.setPhone_number("0500000000");
+            admin.setPassword(passwordEncoder.encode("Admin12345"));            admin.setRole("admin");
+            admin.setCreated_at(LocalDateTime.now());
+
+            userRepository.save(admin);
+            System.out.println("Admin user created");
+        } else {
+            System.out.println("Admin user already exists");
+        }
     }
 }

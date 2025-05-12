@@ -8,6 +8,7 @@ import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Service.ComplaintsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,29 +23,29 @@ public class ComplaintsController {
 
     private final ComplaintsService complaintsService;
 
+    //admin
     @GetMapping("/all")
     public ResponseEntity<List<Complaint>> getAllComplaints() {
         return ResponseEntity.ok(complaintsService.getAllComplaints());
     }
 
+    //student
     @PostMapping("/add")
-    public ResponseEntity<String> addComplaint(/*@AuthenticationPrincipal*/ MyUser user,
-                                               @RequestBody @Valid Complaint complaint) {
+    public ResponseEntity<String> addComplaint(@AuthenticationPrincipal MyUser user, @RequestBody @Valid Complaint complaint) {
         complaintsService.addComplaint(complaint, user.getId());
         return ResponseEntity.ok("Complaint added successfully");
     }
 
+    //student
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateComplaint(/*@AuthenticationPrincipal*/ MyUser user,
-                                                  @PathVariable Integer id,
-                                                  @RequestBody @Valid Complaint complaint) {
+    public ResponseEntity<String> updateComplaint(@AuthenticationPrincipal MyUser user, @PathVariable Integer id, @RequestBody @Valid Complaint complaint) {
         complaintsService.updateComplaint(id, complaint, user.getId());
         return ResponseEntity.ok("Complaint updated successfully");
     }
 
+    //student
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteComplaint(/*@AuthenticationPrincipal*/ MyUser user,
-                                                  @PathVariable Integer id) {
+    public ResponseEntity<String> deleteComplaint(@AuthenticationPrincipal MyUser user, @PathVariable Integer id) {
         complaintsService.deleteComplaint(id, user.getId());
         return ResponseEntity.ok("Complaint deleted successfully");
     }
@@ -53,29 +54,31 @@ public class ComplaintsController {
 
 
     //12
+    //student
     @GetMapping("/complaints")
-    public ResponseEntity<List<Complaint>> getMyComplaints(/*@AuthenticationPrincipal*/ MyUser user) {
+    public ResponseEntity<List<Complaint>> getMyComplaints(@AuthenticationPrincipal MyUser user) {
         return ResponseEntity.status(HttpStatus.OK).body(complaintsService.getComplaintsByStudentId(user.getId()));
 
     }
 
 
-
-    @GetMapping("/by-date/{from}/{to}/{studentId}")
-    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to, @PathVariable Integer studentId) {
-        List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(studentId, from, to);
+    //student
+    @GetMapping("/by-date/{from}/{to}")
+    public ResponseEntity<?> getComplaintsByDate(@PathVariable LocalDateTime from, @PathVariable LocalDateTime to,@AuthenticationPrincipal MyUser user) {
+        List<Complaint> complaints = complaintsService.getComplaintsByStudentAndDate(user.getId(), from, to);
         return ResponseEntity.status(HttpStatus.OK).body(complaints);
 
     }
 
 
-
+    //student
     @GetMapping("/my-complaints/{status}")
-    public ResponseEntity getMyComplaintsByStatus(/*@AuthenticationPrincipal*/ MyUser user, @PathVariable String status) {
+    public ResponseEntity getMyComplaintsByStatus(@AuthenticationPrincipal MyUser user, @PathVariable String status) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 complaintsService.getMyComplaintsByStatus(user.getId(), status));
     }
 
+    //Admin
     @PutMapping("/update-status/{id}")
     public ResponseEntity<String> updateComplaintStatus(@PathVariable Integer id, @RequestParam String status) {
         complaintsService.updateComplaintStatus(id, status);

@@ -49,7 +49,6 @@ public class MyUser implements UserDetails {
     private String phone_number;
 
     @NotEmpty(message = "Please enter a password")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{9,}$", message = "Password must be at least 9 characters and include letters and numbers")
     @Column(columnDefinition = "varchar(255) not null")
     private String password;
 

@@ -9,9 +9,9 @@ import org.example.atharvolunteeringplatform.Model.Organization;
 import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.OrganizationRepository;
 import org.springframework.mail.MailSender;
- 
+
 import org.springframework.mail.SimpleMailMessage;
- 
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,9 +32,9 @@ public class OpportunityService {
     private final OpportunityRepository opportunityRepository;
     private final OrganizationRepository organizationRepository;
 
- 
+
     private final MailSender mailSender;
- 
+
 
 
 
@@ -44,58 +44,58 @@ public class OpportunityService {
 
     private final String uploadDir = "src/main/resources/static/uploads/opportunities/";
 
-  public void createOpportunity(Opportunity opportunity, Integer organizationId, MultipartFile imageFile) {
-    Organization organization = organizationRepository.findOrganizationById(organizationId);
+    public void createOpportunity(Opportunity opportunity, Integer organizationId, MultipartFile imageFile) {
+        Organization organization = organizationRepository.findOrganizationById(organizationId);
 
-    if (organization == null) {
-        throw new ApiException("Organization not found");
-    }
-
-    if (organization.getStatus().equalsIgnoreCase("Inactive")) {
-        throw new ApiException("Organization status is Inactive");
-    }
-
-    if (imageFile == null || imageFile.isEmpty()) {
-        throw new ApiException("Image file is required");
-    }
-
-    String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-
-    try {
-        Path dirPath = Paths.get(uploadDir);
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath);
+        if (organization == null) {
+            throw new ApiException("Organization not found");
         }
 
-        Path filePath = dirPath.resolve(fileName);
-        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        if (organization.getStatus().equalsIgnoreCase("Inactive")) {
+            throw new ApiException("Organization status is Inactive");
+        }
 
-        // Save correct public path
-        opportunity.setImagePath("/uploads/opportunities/" + fileName);
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new ApiException("Image file is required");
+        }
 
-    } catch (IOException e) {
-        throw new RuntimeException("Failed to store image file", e);
+        String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+
+        try {
+            Path dirPath = Paths.get(uploadDir);
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
+            }
+
+            Path filePath = dirPath.resolve(fileName);
+            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Save correct public path
+            opportunity.setImagePath("/uploads/opportunities/" + fileName);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store image file", e);
+        }
+
+        opportunity.setTitle(opportunity.getTitle());
+        opportunity.setDescription(opportunity.getDescription());
+        opportunity.setLocation(opportunity.getLocation());
+        opportunity.setStatus("pending");
+        opportunity.setTypeOpportunity(opportunity.getTypeOpportunity());
+        opportunity.setHours(opportunity.getHours());
+        opportunity.setGender(opportunity.getGender());
+        opportunity.setStudentCapacity(opportunity.getStudentCapacity());
+        opportunity.setStartDate(opportunity.getStartDate());
+        opportunity.setEndDate(opportunity.getEndDate());
+        opportunity.setCreatedAt(LocalDateTime.now());
+
+        opportunity.setOrganization(organization);
+
+        opportunityRepository.save(opportunity);
     }
 
-    opportunity.setTitle(opportunity.getTitle());
-    opportunity.setDescription(opportunity.getDescription());
-    opportunity.setLocation(opportunity.getLocation());
-    opportunity.setStatus("pending");
-    opportunity.setTypeOpportunity(opportunity.getTypeOpportunity());
-    opportunity.setHours(opportunity.getHours());
-    opportunity.setGender(opportunity.getGender());
-    opportunity.setStudentCapacity(opportunity.getStudentCapacity());
-    opportunity.setStartDate(opportunity.getStartDate());
-    opportunity.setEndDate(opportunity.getEndDate());
-    opportunity.setCreatedAt(LocalDateTime.now());
 
-    opportunity.setOrganization(organization);
-
-    opportunityRepository.save(opportunity);
-}
-
-
-    public void updateOpportunity(Integer opportunityId,Integer organizationId, Opportunity updatedOpportunity) {
+    public void updateOpportunity(Integer opportunityId, Integer organizationId, Opportunity updatedOpportunity, MultipartFile imageFile) {
         Opportunity oldOpportunity = opportunityRepository.findOpportunityById(opportunityId);
         Organization oldOrganization = organizationRepository.findOrganizationById(organizationId);
 
@@ -105,12 +105,31 @@ public class OpportunityService {
         if (oldOrganization == null) {
             throw new ApiException("Organization not found");
         }
-
         if (!oldOpportunity.getOrganization().getId().equals(oldOrganization.getId())) {
             throw new ApiException("Organization cannot update this opportunity");
         }
 
+        // ✅ If a new image was uploaded
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
 
+            try {
+                Path dirPath = Paths.get(uploadDir);
+                if (!Files.exists(dirPath)) {
+                    Files.createDirectories(dirPath);
+                }
+
+                Path filePath = dirPath.resolve(fileName);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                oldOpportunity.setImagePath("/uploads/opportunities/" + fileName);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to update image file", e);
+            }
+        }
+
+        // ✅ Update other fields
         oldOpportunity.setTitle(updatedOpportunity.getTitle());
         oldOpportunity.setTypeOpportunity(updatedOpportunity.getTypeOpportunity());
         oldOpportunity.setGender(updatedOpportunity.getGender());
@@ -120,7 +139,6 @@ public class OpportunityService {
         oldOpportunity.setHours(updatedOpportunity.getHours());
         oldOpportunity.setStudentCapacity(updatedOpportunity.getStudentCapacity());
         oldOpportunity.setLocation(updatedOpportunity.getLocation());
-
         oldOpportunity.setStatus("pending");
 
         opportunityRepository.save(oldOpportunity);
@@ -148,9 +166,9 @@ public class OpportunityService {
         int count = 0;
 
         for (Opportunity o : opportunities) {
- 
+
             if (o.getStatus().equalsIgnoreCase(status)) {
- 
+
                 count++;
             }
         }
@@ -166,8 +184,9 @@ public class OpportunityService {
 
 
     //25
-    public List<Opportunity> getOpportunitiesByStatus(String status) {
-        return opportunityRepository.findOpportunitiesByStatus(status);
+    public List<Opportunity> getOpportunitiesByStatus() {
+        return opportunityRepository.findOpportunitiesByStatus("open");
+
     }
 
     //2
@@ -329,8 +348,7 @@ public class OpportunityService {
 
         String status = newStatus.toLowerCase();
 
-        if (status.equals("open") || status.equals("pending") || status.equals("accepted")
-                || status.equals("rejected") || status.equals("closed")) {
+        if (status.equals("open") || status.equals("pending") || status.equals("accepted") || status.equals("rejected") || status.equals("closed")) {
             opportunity.setStatus(status);
             opportunityRepository.save(opportunity);
         } else {
@@ -339,6 +357,3 @@ public class OpportunityService {
     }
 
 }
-
-
-

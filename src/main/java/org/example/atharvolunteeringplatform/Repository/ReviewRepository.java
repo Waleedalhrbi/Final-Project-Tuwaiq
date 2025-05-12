@@ -23,5 +23,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     int countByOpportunity(Opportunity opportunity);
 
 
-
+    @Query("SELECT r FROM Review r WHERE r.opportunity.id = ?1 AND r.opportunity.organization.user.id = ?2")
+    List<Review> findReviewsByOpportunityIdAndOrganizationId(Integer opportunityId, Integer organizationId);
 }
