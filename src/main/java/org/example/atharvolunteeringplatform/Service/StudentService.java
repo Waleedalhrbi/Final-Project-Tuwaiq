@@ -90,6 +90,10 @@ public class StudentService {
             throw new ApiException("Cannot register student to a school that is not Active");
         }
 
+        if (!studentDTO.getGender().equalsIgnoreCase(matchedSchool.getGender())) {
+            throw new ApiException("Student gender does not match the school's gender");
+        }
+
         student.setSchool(matchedSchool);
 
         student.setUserStudent(myUser);

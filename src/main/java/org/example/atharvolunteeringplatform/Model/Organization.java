@@ -4,6 +4,7 @@ package org.example.atharvolunteeringplatform.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,7 +43,9 @@ public class Organization {
     private String location;
 
 
-    @NotEmpty(message = "status is required")
+
+    @Pattern(regexp = "^(Active|Inactive)$", message = "Status must be one of: Active, Inactive")
+    @Column(columnDefinition = "varchar(10)")
     private String status;
 
 

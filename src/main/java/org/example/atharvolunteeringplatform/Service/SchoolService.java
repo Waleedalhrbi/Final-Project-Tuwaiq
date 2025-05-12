@@ -3,17 +3,11 @@ package org.example.atharvolunteeringplatform.Service;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
 import org.example.atharvolunteeringplatform.DTO.SchoolDTO;
-import org.example.atharvolunteeringplatform.Model.MyUser;
-import org.example.atharvolunteeringplatform.Model.School;
-import org.example.atharvolunteeringplatform.Model.Student;
+import org.example.atharvolunteeringplatform.Model.*;
+import org.example.atharvolunteeringplatform.Repository.*;
 import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
 import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
-import org.example.atharvolunteeringplatform.Repository.StudentRepository;
-import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
-import org.example.atharvolunteeringplatform.Repository.MyUserRepository;
-import org.example.atharvolunteeringplatform.Repository.SchoolRepository;
-import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
- 
+
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 
 import org.springframework.mail.SimpleMailMessage;
@@ -22,7 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +28,7 @@ public class SchoolService {
     private final SchoolRepository schoolRepository;
     private final MyUserRepository myUserRepository;
     private final StudentRepository studentRepository;
-
+    private final BadgeRepository badgeRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     private final JavaMailSender mailSender;
 
@@ -184,6 +181,12 @@ public class SchoolService {
             throw new ApiException("Invalid status. Must be 'completed' or 'incomplete'");
         }
 
+
+        if (request.getStatus().equalsIgnoreCase(status)) {
+            throw new ApiException("Request already "+status);
+        }
+
+
         if (status.equalsIgnoreCase("completed") && !request.getStatus().equalsIgnoreCase("completed")) {
 
 
@@ -194,7 +197,23 @@ public class SchoolService {
         request.setStatus(status.toLowerCase());
         studentOpportunityRequestRepository.save(request);
         studentRepository.save(student);
+
+        assignBadgeIfEligible(student);
     }
+
+    //45
+    public void approveStudentAccount(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null || !student.getStatus().equalsIgnoreCase("Inactive") && !student.getStatus().equals("Pending")) {
+            throw new ApiException("Student not found or already approved/rejected");
+        }
+
+        student.setStatus("Active");
+        studentRepository.save(student);
+    }
+
+    }
+
 
 
 
@@ -259,8 +278,7 @@ public class SchoolService {
     }
 
     //48
-    public void updateOpportunityRequestStatus(Integer userId, Integer requestId, String status) {
-
+    public void acceptOrRejectRequest(Integer userId, Integer requestId, String status) {
         School school = schoolRepository.findSchoolById(userId);
         if (school == null) throw new ApiException("School not found");
 
@@ -276,18 +294,26 @@ public class SchoolService {
             throw new ApiException("Cannot update status. The opportunity has already ended");
         }
 
-        if (!status.equalsIgnoreCase("accepted") && !status.equalsIgnoreCase("rejected")) {
-            throw new ApiException("Invalid status. Must be 'accepted' or 'rejected'");
-        }
 
         request.setSupervisor_status(status.toLowerCase());
+
+
+        if (status.equalsIgnoreCase("rejected")) {
+            request.setStatus("rejected");
+        }
+
+        else if (status.equalsIgnoreCase("approved") && "approved".equalsIgnoreCase(request.getOrganization_status())) {
+            request.setStatus("approved");
+            request.setApproved_at(LocalDateTime.now());
+        }
+
         studentOpportunityRequestRepository.save(request);
 
 
         String email = student.getUserStudent().getEmail();
         sendVolunteerDecisionEmail(
                 email,
-                status,
+                request.getStatus(),
                 request.getOpportunity().getTitle(),
                 request.getOpportunity().getOrganization().getName(),
                 request.getOpportunity().getLocation(),
@@ -298,5 +324,110 @@ public class SchoolService {
 
 
 
+    //50
+    public Map<String, Object> getStudentDetailsResponse(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+        if (student == null){
+            throw new ApiException("Student not found");
 
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", student.getId());
+        response.put("name", student.getName());
+        response.put("school_name", student.getSchool_name());
+        response.put("age", student.getAge());
+        response.put("grade_level", student.getGrade_level());
+        response.put("gender", student.getGender());
+        response.put("status", student.getStatus());
+        response.put("total_hours", student.getTotal_hours());
+        response.put("badges_count", student.getBadges_count());
+
+        return response;
+    }
+
+    //58
+    public void activateSchool(Integer schoolId) {
+        School school = schoolRepository.findSchoolById(schoolId);
+
+        if (school == null) {
+            throw new ApiException("School not found");
+        }
+
+        if ("Active".equalsIgnoreCase(school.getStatus())) {
+            throw new ApiException("School is already active");
+        }
+
+        school.setStatus("Active");
+        schoolRepository.save(school);
+    }
+
+    //43
+    public void notifyNonVolunteeringStudent(Integer studentId) {
+        Student student = studentRepository.findStudentById(studentId);
+
+        if (student == null) {
+            throw new ApiException("Student not found");
+        }
+
+        if (student.getTotal_hours() != 0) {
+            throw new ApiException("Student already has volunteering hours");
+        }
+
+        // التحقق من عدم وجود طلبات تطوع
+        boolean hasRequests = studentOpportunityRequestRepository.existsByStudentId(studentId);
+
+        if (hasRequests) {
+            throw new ApiException("Student has already applied for a volunteering opportunity");
+        }
+
+        String to = student.getUserStudent().getEmail();
+        String subject = "تذكير بالتسجيل في الفرص التطوعية";
+        String body = "عزيزي/عزيزتي " + student.getName() + "،\n\n" +
+                "لاحظنا أنك لم تقم بالتسجيل في أي فرصة تطوعية حتى الآن.\n" +
+                "نحثك على المسارعة بالتسجيل والمشاركة في الأعمال التطوعية المتاحة عبر منصة أثر.\n\n" +
+                "المساهمة المجتمعية لها أثر كبير، ونحن بانتظار مشاركتك.\n\n" +
+                "مع تحيات فريق أثر.";
+
+        sendDecisionEmail(to, subject, body);
+    }
+
+
+    public void sendDecisionEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void assignBadgeIfEligible(Student student) {
+        Integer totalHours = student.getTotal_hours();
+
+        // كل البادجات المرتبة حسب الساعات المطلوبة (criteria)
+        List<Badge> allBadges = badgeRepository.findAllByOrderByCriteriaAsc();
+
+        // البادجات اللي يملكها الطالب
+        Set<Badge> ownedBadges = student.getBadges();
+
+        for (Badge badge : allBadges) {
+            boolean alreadyOwned = false;
+
+            // نتحقق إذا الطالب يملك البادج
+            for (Badge owned : ownedBadges) {
+                if (owned.getId().equals(badge.getId())) {
+                    alreadyOwned = true;
+                    break;
+                }
+            }
+
+            // إذا استحق البادج وما يملكه، نضيفه
+            if (totalHours >= badge.getCriteria() && !alreadyOwned) {
+                student.getBadges().add(badge);
+            }
+        }
+
+        studentRepository.save(student);
+    }
 }
