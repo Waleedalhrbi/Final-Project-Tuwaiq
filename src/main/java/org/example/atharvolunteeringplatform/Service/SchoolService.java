@@ -32,6 +32,7 @@ public class SchoolService {
     public void addSchool(SchoolDTO schoolDTO) {
         MyUser myUser = new MyUser();
         myUser.setName(schoolDTO.getName());
+        myUser.setUsername(schoolDTO.getUsername());
         myUser.setEmail(schoolDTO.getEmail());
         myUser.setPhone_number(schoolDTO.getPhoneNumber());
         myUser.setPassword(schoolDTO.getPassword());
@@ -63,6 +64,7 @@ public class SchoolService {
         if (school == null) throw new ApiException("School entity not found");
 
         oldUser.setName(schoolDTO.getName());
+        oldUser.setUsername(schoolDTO.getUsername());
         oldUser.setEmail(schoolDTO.getEmail());
         oldUser.setPhone_number(schoolDTO.getPhoneNumber());
         oldUser.setPassword(schoolDTO.getPassword());

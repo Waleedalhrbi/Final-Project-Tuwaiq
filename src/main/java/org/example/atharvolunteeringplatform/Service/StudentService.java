@@ -55,6 +55,7 @@ public class StudentService {
         List<School> schools = schoolRepository.findAll();
         MyUser myUser = new MyUser();
         myUser.setName(studentDTO.getName());
+        myUser.setUsername(studentDTO.getUsername());
         myUser.setEmail(studentDTO.getEmail());
         myUser.setPhone_number(studentDTO.getPhone_number());
 
@@ -113,6 +114,7 @@ public class StudentService {
 
 
         oldUser.setName(studentDTO.getName());
+        oldUser.setUsername(studentDTO.getUsername());
         oldUser.setEmail(studentDTO.getEmail());
         oldUser.setPhone_number(studentDTO.getPhone_number());
         oldUser.setPassword(studentDTO.getPassword());

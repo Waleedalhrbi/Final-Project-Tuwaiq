@@ -1,10 +1,7 @@
 package org.example.atharvolunteeringplatform.DTO;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +13,10 @@ public class OrganizationDTO {
     @NotEmpty(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
+
+    @NotNull(message = "Username cannot be null")
+    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
+    private String username;
 
     @NotEmpty(message = "Organization name is required")
     @Size(max = 100, message = "Name must not exceed 100 characters")

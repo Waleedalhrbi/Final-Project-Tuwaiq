@@ -42,6 +42,7 @@ public class OrganizationService {
         MyUser user = new MyUser();
 
         user.setName(organizationDTO.getName());
+        user.setUsername(organizationDTO.getUsername());
         user.setEmail(organizationDTO.getEmail());
         user.setPassword(organizationDTO.getPassword());
         user.setPhone_number(organizationDTO.getPhoneNumber());
@@ -67,6 +68,7 @@ public class OrganizationService {
             throw new ApiException("Organization not found");
         }
         oldUser.setName(organizationDTO.getName());
+        oldUser.setUsername(organizationDTO.getUsername());
         oldUser.setEmail(organizationDTO.getEmail());
         oldUser.setPhone_number(organizationDTO.getPhoneNumber());
         oldUser.setPassword(organizationDTO.getPassword());
