@@ -13,10 +13,17 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
  
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +42,39 @@ public class OpportunityService {
         return opportunityRepository.findAll();
     }
 
-    public void createOpportunity(Opportunity opportunity, Integer organizationId) {
+    private final String uploadDir = "src/main/resources/static/uploads/opportunities/";
+
+    public void createOpportunity(Opportunity opportunity, Integer organizationId, MultipartFile imageFile) {
         Organization organization = organizationRepository.findOrganizationById(organizationId);
 
         if (organization == null) {
             throw new ApiException("Organization not found");
         }
 
-        if (organization.getStatus().equals("Inactive")) {
+        if (organization.getStatus().equalsIgnoreCase("Inactive")) {
             throw new ApiException("Organization status is Inactive");
+        }
+
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new ApiException("Image file is required");
+        }
+
+        String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+
+        try {
+            Path dirPath = Paths.get(uploadDir);
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
+            }
+
+            Path filePath = dirPath.resolve(fileName);
+            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Save correct public path
+            opportunity.setImagePath("/uploads/opportunities/" + fileName);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store image file", e);
         }
 
         opportunity.setTitle(opportunity.getTitle());
@@ -59,6 +90,7 @@ public class OpportunityService {
         opportunity.setCreatedAt(LocalDateTime.now());
 
         opportunity.setOrganization(organization);
+
         opportunityRepository.save(opportunity);
     }
 

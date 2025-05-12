@@ -212,17 +212,13 @@ public class SchoolService {
         studentRepository.save(student);
     }
 
-    }
-
-
-
 
     //46
     public void rejectStudentAccount(Integer studentId) {
         Student student = studentRepository.findStudentById(studentId);
 
         if (student == null) {
-          throw new ApiException("Student not found");
+            throw new ApiException("Student not found");
         }
 
         if (!student.getStatus().equals("Pending") && !student.getStatus().equals("Inactive")) {
