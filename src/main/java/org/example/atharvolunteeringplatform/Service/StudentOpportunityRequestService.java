@@ -11,6 +11,7 @@ import org.example.atharvolunteeringplatform.Repository.StudentOpportunityReques
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,8 +44,16 @@ public class StudentOpportunityRequestService {
             throw new ApiException("Opportunity not found");
         }
 
+        if (opportunity.getEndDate().isBefore(LocalDate.now())){
+            throw new ApiException("Opportunity end date is after current date");
+        }
+
         if (student.getStatus().equalsIgnoreCase("Inactive")) {
             throw new ApiException("Student account not active");
+        }
+
+        if (!opportunity.getStatus().equalsIgnoreCase("open")) {
+            throw new ApiException("Opportunity not open");
         }
 
         if (!student.getGender().equalsIgnoreCase(opportunity.getGender())) {
@@ -78,6 +87,10 @@ public class StudentOpportunityRequestService {
 
 
         studentOpportunityRequestRepository.delete(existingRequest);
+    }
+
+    public List<StudentOpportunityRequest> getOpportunityRequestsByOrganizationId(Integer organizationId) {
+        return studentOpportunityRequestRepository.findStudentOpportunityRequestsByOrganizationId(organizationId);
     }
 
     //10
@@ -158,5 +171,5 @@ public class StudentOpportunityRequestService {
         return studentOpportunityRequestRepository.findCompletedOpportunitiesByStudentId(studentId);
     }
 
- 
+
 }

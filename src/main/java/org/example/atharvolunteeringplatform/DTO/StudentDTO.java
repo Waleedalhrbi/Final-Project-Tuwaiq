@@ -17,7 +17,7 @@ public class StudentDTO {
 
     // User
     @NotNull(message = "Username cannot be null")
-    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
+    @Size(min = 4, max = 30, message = "Username must be between 4 and 10 characters")
     private String username;
 
     @NotEmpty(message = "Please enter the student name")
@@ -33,7 +33,7 @@ public class StudentDTO {
     private String phone_number;
 
     @NotEmpty(message = "Please enter a password")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{9,}$", message = "Password must be at least 9 characters and include letters and numbers")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "Password must be at least 9 characters and include letters and numbers")
     private String password;
 
     private LocalDateTime created_at;

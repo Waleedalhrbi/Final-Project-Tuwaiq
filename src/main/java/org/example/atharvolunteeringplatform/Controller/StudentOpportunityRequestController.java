@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiResponse;
 import org.example.atharvolunteeringplatform.DTO.OpportunityDTO;
 import org.example.atharvolunteeringplatform.Model.MyUser;
+import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Service.StudentOpportunityRequestService;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,12 @@ public class StudentOpportunityRequestController {
     public ResponseEntity deleteOpportunityRequest(@PathVariable Integer requestId) {
         studentOpportunityRequestService.deleteOpportunityRequest(requestId);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity request deleted successfully"));
+    }
+
+    @GetMapping("/Opportunity-Requests-By-Organization")
+    public ResponseEntity<?> getOrganizationOpportunities(@AuthenticationPrincipal MyUser myUser) {
+        List<StudentOpportunityRequest> my = studentOpportunityRequestService.getOpportunityRequestsByOrganizationId(myUser.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(my);
     }
 
     //10

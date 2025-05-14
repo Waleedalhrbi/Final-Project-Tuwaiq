@@ -1,5 +1,6 @@
 package org.example.atharvolunteeringplatform.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotEmpty;
@@ -41,6 +42,7 @@ public class Badge {
 
 
     @ManyToMany(mappedBy = "badges")
+    @JsonIgnore
     private Set<Student> students;
 
 }

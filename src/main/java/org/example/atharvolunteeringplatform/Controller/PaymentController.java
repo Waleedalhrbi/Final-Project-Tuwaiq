@@ -2,11 +2,13 @@ package org.example.atharvolunteeringplatform.Controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.example.atharvolunteeringplatform.Model.MyUser;
 import org.example.atharvolunteeringplatform.Model.PaymentRequest;
 import org.example.atharvolunteeringplatform.Service.PaymentService;
 import org.example.atharvolunteeringplatform.Service.StudentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,8 +26,8 @@ public class PaymentController {
     private String apiKey;
 
     @PostMapping("/card")
-    public ResponseEntity processPayment(@RequestBody PaymentRequest paymentRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(paymentService.processPayment(paymentRequest));
+    public ResponseEntity processPayment(@RequestBody PaymentRequest paymentRequest, @AuthenticationPrincipal MyUser myUser) {
+        return ResponseEntity.status(HttpStatus.OK).body(paymentService.processPayment(paymentRequest, myUser.getId()));
     }
 
     @RequestMapping(value = "/callback", method = {RequestMethod.GET, RequestMethod.POST})

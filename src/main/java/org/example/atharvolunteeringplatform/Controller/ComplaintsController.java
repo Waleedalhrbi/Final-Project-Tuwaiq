@@ -30,9 +30,9 @@ public class ComplaintsController {
     }
 
     //student
-    @PostMapping("/add")
-    public ResponseEntity<String> addComplaint(@AuthenticationPrincipal MyUser user, @RequestBody @Valid Complaint complaint) {
-        complaintsService.addComplaint(complaint, user.getId());
+    @PostMapping("/add/{opportunityId}")
+    public ResponseEntity<String> addComplaint(@PathVariable Integer opportunityId, @AuthenticationPrincipal MyUser user, @RequestBody @Valid Complaint complaint) {
+        complaintsService.addComplaint(complaint, user.getId(),opportunityId);
         return ResponseEntity.ok("Complaint added successfully");
     }
 
@@ -79,8 +79,8 @@ public class ComplaintsController {
     }
 
     //Admin
-    @PutMapping("/update-status/{id}")
-    public ResponseEntity<String> updateComplaintStatus(@PathVariable Integer id, @RequestParam String status) {
+    @PutMapping("/update-status/{id}/{status}")
+    public ResponseEntity<String> updateComplaintStatus(@PathVariable Integer id, @PathVariable String status) {
         complaintsService.updateComplaintStatus(id, status);
         return ResponseEntity.ok("Complaint status updated successfully");
 

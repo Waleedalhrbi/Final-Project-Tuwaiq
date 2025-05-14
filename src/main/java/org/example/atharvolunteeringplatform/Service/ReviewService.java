@@ -39,7 +39,8 @@ public class ReviewService {
 
         List<StudentOpportunityRequest> completedRequests = studentOpportunityRequestRepository.findCompletedRequestsForOpportunity(opportunityId, schoolId);
 
-        if (completedRequests == null) {
+
+        if (completedRequests.isEmpty()) {
             throw new ApiException("This school is not allowed to review this opportunity");
         }
 

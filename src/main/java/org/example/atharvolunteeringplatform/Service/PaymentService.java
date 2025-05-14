@@ -13,10 +13,10 @@ public class PaymentService {
     @Value("${moyasar.api.key}")
     private String apiKey;
 
-    public ResponseEntity<String> processPayment(PaymentRequest paymentRequest) {
+    public ResponseEntity<String> processPayment(PaymentRequest paymentRequest, Integer StudentId) {
         String url = "https://api.moyasar.com/v1/payments";
 
-        String callbackUrl = "http://localhost:8080/api/v1/payments/callback?studentId=" + paymentRequest.getStudentId();
+        String callbackUrl = "http://localhost:8080/api/v1/payments/callback?studentId=" + StudentId;
 
         String requestBody = String.format(
                 "source[type]=card&source[name]=%s&source[number]=%s&source[cvc]=%s&" +

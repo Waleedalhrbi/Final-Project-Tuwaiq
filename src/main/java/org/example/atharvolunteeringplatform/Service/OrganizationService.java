@@ -96,6 +96,8 @@ public class OrganizationService {
         organizationRepository.delete(organization);
     }
 
+
+
     //19 volunteersCount
     public int volunteersCount(Integer organizationId) {
         Organization organization = organizationRepository.findOrganizationById(organizationId);
@@ -185,8 +187,9 @@ public class OrganizationService {
             throw new ApiException("Request is not in this organization");
         }
 
-        request.setOrganization_status("approved");
+        // ... نفس الكود السابق
 
+        request.setOrganization_status("approved");
 
         if ("approved".equalsIgnoreCase(request.getSupervisor_status())) {
             request.setStatus("approved");
@@ -195,10 +198,13 @@ public class OrganizationService {
 
         studentOpportunityRequestRepository.save(request);
 
-        String to = request.getStudent().getUserStudent().getEmail();
-        String subject = "قبول طلب التطوع";
-        String body = "تهانينا! تم قبول طلبك للتطوع في الفرصة من قبل الجهة المنظمة: " + request.getOpportunity().getTitle();
-        sendDecisionEmail(to, subject, body);
+        // ✅ فقط إذا تم اعتماد الطلب من الطرفين
+        if ("approved".equalsIgnoreCase(request.getStatus())) {
+            String to = request.getStudent().getUserStudent().getEmail();
+            String subject = "قبول طلب التطوع";
+            String body = "تهانينا! تم قبول طلبك للتطوع في الفرصة من قبل الجهة والمنسق: " + request.getOpportunity().getTitle();
+            sendDecisionEmail(to, subject, body);
+        }
     }
 
 
@@ -229,9 +235,17 @@ public class OrganizationService {
             throw new ApiException("Unauthorized access");
         }
 
-        if (opportunity.getStatus().equalsIgnoreCase("open") || opportunity.getStatus().equalsIgnoreCase("closed") || opportunity.getStatus().equalsIgnoreCase("accepted")) {
-            opportunity.setStatus("open");
+
+        if (opportunity.getStatus().equalsIgnoreCase("open")) {
+            throw new ApiException("Opportunity is already open");
         }
+        if (!opportunity.getStatus().equalsIgnoreCase("accepted")) {
+            throw new ApiException("Only accepted opportunities can be opened");
+        }
+
+
+        opportunity.setStatus("open");
+
         opportunityRepository.save(opportunity);
     }
 
