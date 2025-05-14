@@ -119,6 +119,10 @@ public class OpportunityController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Opportunity deleted successfully"));
     }
 
+
+
+
+
     //organization
     @GetMapping("/sorted-by-capacity")
     public ResponseEntity<?> getOpportunitiesSorted(@AuthenticationPrincipal MyUser myUser) {

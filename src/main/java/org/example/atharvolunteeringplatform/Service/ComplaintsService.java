@@ -6,6 +6,7 @@ import org.example.atharvolunteeringplatform.Model.Opportunity;
 import org.example.atharvolunteeringplatform.Model.Student;
 import org.example.atharvolunteeringplatform.Model.StudentOpportunityRequest;
 import org.example.atharvolunteeringplatform.Repository.ComplaintsRepository;
+import org.example.atharvolunteeringplatform.Repository.OpportunityRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentOpportunityRequestRepository;
 import org.example.atharvolunteeringplatform.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -21,17 +22,18 @@ public class ComplaintsService {
 
     private final ComplaintsRepository complaintsRepository;
     private final StudentRepository studentRepository;
+    private final OpportunityRepository opportunityRepository;
     private final StudentOpportunityRequestRepository studentOpportunityRequestRepository;
     public List<Complaint> getAllComplaints() {
         return complaintsRepository.findAll();
     }
 
-    public void addComplaint(Complaint complaint, Integer studentId) {
+    public void addComplaint(Complaint complaint, Integer studentId, Integer opportunityId) {
         Student student = studentRepository.findStudentById(studentId);
         if (student == null) throw new ApiException("Student not found");
 
-        Opportunity opportunity = complaint.getOpportunity();
-        if (opportunity == null) throw new ApiException("Opportunity must be provided");
+        Opportunity opportunity = opportunityRepository.findOpportunityById(opportunityId);
+        if (opportunity == null) throw new ApiException("Opportunity not found");
 
         StudentOpportunityRequest request = studentOpportunityRequestRepository.findRequestByStudentIdAndOpportunityId(studentId, opportunity.getId());
 
@@ -40,6 +42,9 @@ public class ComplaintsService {
             throw new ApiException("You can only submit a complaint if you have completed or incompletely finished the opportunity");
         }
 
+        complaint.setTitle(complaint.getTitle());
+        complaint.setDescription(complaint.getDescription());
+        complaint.setOpportunity(opportunity);
         complaint.setStudents(student);
         complaint.setCreateAt(LocalDateTime.now());
         complaint.setStatus("In Progress");
@@ -81,7 +86,7 @@ public class ComplaintsService {
     }
 
     //14
- 
+
     public List<Complaint> getComplaintsByStudentAndDate(Integer studentId, LocalDateTime from, LocalDateTime to) {
         return complaintsRepository.findByStudentIdAndCreateAtBetween(studentId, from, to);
     }

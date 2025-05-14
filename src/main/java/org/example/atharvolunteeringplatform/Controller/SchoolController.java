@@ -60,7 +60,7 @@ public class SchoolController {
     //38
     //supervisor
     @GetMapping("/volunteers/{grade}")
-    public ResponseEntity getVolunteeringStudents(@PathVariable String grade, @AuthenticationPrincipal MyUser user) {
+    public ResponseEntity<?> getVolunteeringStudents(@PathVariable String grade, @AuthenticationPrincipal MyUser user) {
         List<Student> students = schoolService.getVolunteeringStudentsByGrade(grade, user.getId());
         return ResponseEntity.ok(students);
     }
@@ -81,16 +81,33 @@ public class SchoolController {
 
 
     //supervisor
-    @PutMapping("/opportunity-request/{requestId}/status/{status}")
-    public ResponseEntity updateRequestStatus( @PathVariable Integer requestId, @PathVariable String status ,@AuthenticationPrincipal MyUser user) {
+//    @PutMapping("/opportunity-request/{requestId}/status/{status}")
+//    public ResponseEntity<?> updateRequestStatus( @PathVariable Integer requestId, @PathVariable String status ,@AuthenticationPrincipal MyUser user) {
+//
+//        schoolService.updateRequestStatus(user.getId(), requestId, status);
+//        return ResponseEntity.ok("Request status updated to: " + status);
+//    }
 
-        schoolService.updateRequestStatus(user.getId(), requestId, status);
-        return ResponseEntity.ok("Request status updated to: " + status);
+
+    //supervisor
+    @PutMapping("/opportunity-request/{requestId}/complete")
+    public ResponseEntity<?> markRequestAsCompleted(@PathVariable Integer requestId,
+                                                    @AuthenticationPrincipal MyUser user) {
+        schoolService.markRequestAsCompleted(user.getId(), requestId);
+        return ResponseEntity.ok("Request status updated to: completed");
     }
+    @PutMapping("/opportunity-request/{requestId}/incomplete")
+    public ResponseEntity<?> markRequestAsIncomplete(@PathVariable Integer requestId,
+                                                     @AuthenticationPrincipal MyUser user) {
+        schoolService.markRequestAsIncomplete(user.getId(), requestId);
+        return ResponseEntity.ok("Request status updated to: incomplete");
+    }
+
+
 
     //supervisor
     @GetMapping("/requests")
-    public ResponseEntity<List<StudentOpportunityRequest>> getStudentRequestsBySchoolUser(@AuthenticationPrincipal MyUser user) {
+    public ResponseEntity<List<StudentOpportunityRequest>> getStudentsRequestsBySchool(@AuthenticationPrincipal MyUser user) {
 
         List<StudentOpportunityRequest> studentRequests = schoolService.getStudentRequestsBySchoolUser(user.getId());
 
@@ -100,7 +117,7 @@ public class SchoolController {
     //supervisor
     @PutMapping("/accept/{requestId}")
     public ResponseEntity<String> acceptRequest(@AuthenticationPrincipal MyUser user, @PathVariable Integer requestId) {
-        schoolService.acceptOrRejectRequest(user.getId(), requestId, "accepted");
+        schoolService.acceptOrRejectRequest(user.getId(), requestId, "approved");
         return ResponseEntity.ok("Request accepted successfully");
     }
 

@@ -45,7 +45,7 @@ public class ConfigurationSecurity {
                         "/api/v1/student/update",
                         "/api/v1/student/my-requests",
                         "/api/v1/student/opportunities-by-hours",
-                        "/api/v1/student/opportunities-by-date/**",
+                        "/api/v1/student/opportunities-by-date/{from}/{to}",
                         "/api/v1/student/completed-opportunities",
                         "/api/v1/student/hours-summary"
                 ).hasAuthority("student")
@@ -56,73 +56,69 @@ public class ConfigurationSecurity {
                 // أدمن (من student controller)
                 .requestMatchers(
                         "/api/v1/student/get-all",
-                        "/api/v1/student/delete/**"
+                        "/api/v1/student/delete/{studentID}"
                 ).hasAuthority("admin")
 
-                // ============= SchoolController =============
-
+                // ================= SchoolController ==================
                 // متاح للجميع
                 .requestMatchers("/api/v1/school/add").permitAll()
 
                 // أدمن فقط
                 .requestMatchers(
                         "/api/v1/school/all",
-                        "/api/v1/school/delete/**",
-                        "/api/v1/school/activate/**"
+                        "/api/v1/school/delete/{schoolId}",
+                        "/api/v1/school/activate/{id}"
                 ).hasAuthority("admin")
 
                 // مشرف فقط
                 .requestMatchers(
                         "/api/v1/school/update",
-                        "/api/v1/school/volunteers/**",
-                        "/api/v1/school/students/non-volunteers/**",
-                        "/api/v1/school/student-opportunities/**",
-                        "/api/v1/school/opportunity-request/**/status/**",
+                        "/api/v1/school/volunteers/{grade}",
+                        "/api/v1/school/students/non-volunteers/{gradeLevel}",
+                        "/api/v1/school/student-opportunities/{studentId}",
+                        "/api/v1/school/opportunity-request/{requestId}/complete",
+                        "/api/v1/school/opportunity-request/{requestId}/incomplete",
                         "/api/v1/school/requests",
-                        "/api/v1/school/accept/**",
-                        "/api/v1/school/reject/**",
-                        "/api/v1/school/students/**/active",
-                        "/api/v1/school/notify-non-volunteering/**",
-                        "/api/v1/school/students/reject/**",
-                        "/api/v1/school/students/details/**"
+                        "/api/v1/school/accept/{requestId}",
+                        "/api/v1/school/reject/{requestId}",
+                        "/api/v1/school/students/{studentId}/active",
+                        "/api/v1/school/notify-non-volunteering/{studentId}",
+                        "/api/v1/school/students/reject/{studentId}",
+                        "/api/v1/school/students/details/{studentId}"
                 ).hasAuthority("supervisor")
-// ====== StudentOpportunityRequestController ======
 
+                //  ========== StudentOpportunityRequestController ==========
 
                 .requestMatchers("/api/v1/student-opportunity-request/get-all").hasAuthority("admin")
-                .requestMatchers("/api/v1/student-opportunity-request/delete/**").hasAuthority("admin")
+                .requestMatchers("/api/v1/student-opportunity-request/delete/{requestId}").hasAuthority("admin")
+
+                .requestMatchers("/api/v1/student-opportunity-request/request/{opportunityId}").hasAuthority("student")
+                .requestMatchers("/api/v1/student-opportunity-request/student/opportunities/filter/{status}").hasAuthority("student")
+
+                .requestMatchers("/api/v1/student-opportunity-request/approve-request/{requestId}").hasAuthority("organization")
+                .requestMatchers("/api/v1/student-opportunity-request/reject-request/{requestId}/").hasAuthority("organization")
+                .requestMatchers("/api/v1/student-opportunity-request/Opportunity-Requests-By-Organization").hasAuthority("organization")
 
 
+                // ================= ComplaintsController =================
+                // متاح للطالب فقط
                 .requestMatchers(
-                        "/api/v1/student-opportunity-request/request/**",
-                        "/api/v1/student-opportunity-request/student/opportunities/filter/**"
+                        "/api/v1/Complaints/add/{opportunityId}",
+                        "/api/v1/Complaints/update/{id}",
+                        "/api/v1/Complaints/delete/{id}",
+                        "/api/v1/Complaints/complaints",
+                        "/api/v1/Complaints/by-date/{from}/{to}",
+                        "/api/v1/Complaints/my-complaints/{status}",
+                        "/api/v1/payments/card"
                 ).hasAuthority("student")
 
-
-                .requestMatchers(
-                        "/api/v1/student-opportunity-request/approve-request/**",
-                        "/api/v1/student-opportunity-request/reject-request/**"
-                ).hasAuthority("organization")
-
-// ====== ComplaintsController ======
-
-// متاح للطالب فقط
-                .requestMatchers(
-                        "/api/v1/Complaints/add",
-                        "/api/v1/Complaints/update/**",
-                        "/api/v1/Complaints/delete/**",
-                        "/api/v1/Complaints/complaints",                 // getMyComplaints
-                        "/api/v1/Complaints/by-date/**",
-                        "/api/v1/Complaints/my-complaints/**"
-                ).hasAuthority("student")
-
-// متاح للأدمن فقط
+                // متاح للأدمن فقط
                 .requestMatchers(
                         "/api/v1/Complaints/all",
-                        "/api/v1/Complaints/update-status/**"
+                        "/api/v1/Complaints/update-status/{id}"
                 ).hasAuthority("admin")
 
-                // Organization endpoints
+                // ================== Organization endpoints ==================
                 .requestMatchers("/api/v1/organization/add").permitAll()
                 .requestMatchers(
                         "/api/v1/organization/update",
@@ -130,14 +126,15 @@ public class ConfigurationSecurity {
                         "/api/v1/organization/count/opportunities",
                         "/api/v1/organization/total-hours",
                         "/api/v1/organization/organization/pending",
-                        "/api/v1/organization/reject-request/**",
-                        "/api/v1/organization/accept-request/**",
+                        "/api/v1/organization/reject-request/{requestId}",
+                        "/api/v1/organization/accept-request/{requestId}",
                         "/api/v1/organization/organization/history",
-                        "/api/v1/organization/open/**",
-                        "/api/v1/organization/close/**"
+                        "/api/v1/organization/open/{opportunityId}",
+                        "/api/v1/organization/close/{opportunityId}",
+                        "/api/v1/opportunity/get-Organization-Opportunities"
                 ).hasAuthority("organization")
 
-                // Opportunity - organization
+                // ================= Opportunity endpoints ==================
                 .requestMatchers(
                         "/api/v1/opportunity/create",
                         "/api/v1/opportunity/update",
@@ -148,19 +145,22 @@ public class ConfigurationSecurity {
                         "/api/v1/opportunity/count/closed",
                         "/api/v1/opportunity/count/total"
                 ).hasAuthority("organization")
+
                 .requestMatchers("/api/v1/get-Open-Opportunities").permitAll()
-                // Opportunity - admin
+
+                // ================= Opportunity - admin ==================
                 .requestMatchers(
                         "/api/v1/opportunity/get-all",
-                        "/api/v1/opportunity/opportunities/image/**",
-                        "/api/v1/opportunity/delete/**",
-                        "/api/v1/opportunity/accept/**",
-                        "/api/v1/opportunity/accept-edit/**",
-                        "/api/v1/opportunity/reject/**",
-                        "/api/v1/opportunity/reject-edit/**",
-                        "/api/v1/opportunity/admin/change-opportunity-status/**"
+                        "/api/v1/opportunity/opportunities/image/{id}",
+                        "/api/v1/opportunity/delete/{opportunityId}",
+                        "/api/v1/opportunity/accept/{id}",
+                        "/api/v1/opportunity/accept-edit/{id}",
+                        "/api/v1/opportunity/reject/{id}",
+                        "/api/v1/opportunity/reject-edit/{id}",
+                        "/api/v1/opportunity/admin/change-opportunity-status/{opportunityId}/{newStatus}"
                 ).hasAuthority("admin")
-                // ========== Review Endpoints ==========
+
+                // ================= Review endpoints ====================
                 .requestMatchers(
                         "/api/v1/review/all",
                         "/api/v1/review/delete/{id}"
@@ -168,18 +168,19 @@ public class ConfigurationSecurity {
 
                 // Supervisor: add review and delete own review
                 .requestMatchers(
-                        "/api/v1/review/add-review/opportunity/**",
-                        "/api/v1/review/delete/**"
+                        "/api/v1/review/add-review/opportunity/{opportunityId}",
+                        "/api/v1/review/delete/{reviewId}"
                 ).hasAuthority("supervisor")
 
                 // Organization: view reviews, counts, and ratings
                 .requestMatchers(
-                        "/api/v1/review/get-review/**",
+                        "/api/v1/review/get-review/{opportunityId}",
                         "/api/v1/review/organization/average-rating",
                         "/api/v1/review/organization/review-count",
-                        "/api/v1/review/opportunity/**/average-rating",
-                        "/api/v1/review/opportunity/**/review-count"
+                        "/api/v1/review/opportunity/{opportunityId}/average-rating",
+                        "/api/v1/review/opportunity/{opportunityId}/review-count"
                 ).hasAuthority("organization")
+
                 .requestMatchers("/api/v1/badge/**").hasAuthority("admin")
                 .anyRequest().authenticated()
 

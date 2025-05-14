@@ -8,6 +8,7 @@ import org.example.atharvolunteeringplatform.Repository.*;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,13 +30,15 @@ public class SchoolService {
         return schoolRepository.findAll();
     }
 
+
     public void addSchool(SchoolDTO schoolDTO) {
         MyUser myUser = new MyUser();
         myUser.setName(schoolDTO.getName());
         myUser.setUsername(schoolDTO.getUsername());
         myUser.setEmail(schoolDTO.getEmail());
         myUser.setPhone_number(schoolDTO.getPhoneNumber());
-        myUser.setPassword(schoolDTO.getPassword());
+        String hashPassword = new BCryptPasswordEncoder().encode(schoolDTO.getPassword());
+        myUser.setPassword(hashPassword);
         myUser.setRole("supervisor");
         myUser.setCreated_at(LocalDateTime.now());
         myUserRepository.save(myUser);
@@ -114,6 +117,55 @@ public class SchoolService {
         return studentRepository.findNonVolunteersStudents(gradeLevel, schoolId);
     }
 
+    private StudentOpportunityRequest validateRequestForStatusUpdate(Integer userId, Integer requestId) {
+        School school = schoolRepository.findSchoolById(userId);
+        if (school == null) throw new ApiException("School not found");
+
+        StudentOpportunityRequest request = studentOpportunityRequestRepository.findStudentOpportunityRequestById(requestId);
+        if (request == null) throw new ApiException("Request not found");
+
+        Student student = request.getStudent();
+        if (!student.getSchool().getId().equals(school.getId())) {
+            throw new ApiException("This student does not belong to your school");
+        }
+
+        if (request.getOpportunity().getEndDate().isAfter(LocalDate.now())) {
+            throw new ApiException("Cannot update status. Opportunity has not ended yet");
+        }
+
+        return request;
+    }
+
+    public void markRequestAsCompleted(Integer userId, Integer requestId) {
+        StudentOpportunityRequest request = validateRequestForStatusUpdate(userId, requestId);
+        Student student = request.getStudent();
+
+        if (request.getStatus().equalsIgnoreCase("completed")) {
+            throw new ApiException("Request already completed");
+        }
+
+        int hours = request.getOpportunity().getHours();
+        student.setTotal_hours(student.getTotal_hours() + hours);
+
+        request.setStatus("completed");
+        studentOpportunityRequestRepository.save(request);
+        studentRepository.save(student);
+
+        assignBadgeIfEligible(student);
+    }
+
+    public void markRequestAsIncomplete(Integer userId, Integer requestId) {
+        StudentOpportunityRequest request = validateRequestForStatusUpdate(userId, requestId);
+
+        if (request.getStatus().equalsIgnoreCase("incomplete")) {
+            throw new ApiException("Request already incomplete");
+        }
+
+        request.setStatus("incomplete");
+        studentOpportunityRequestRepository.save(request);
+    }
+
+
     public void updateRequestStatus(Integer userId, Integer requestId, String status) {
         School school = schoolRepository.findSchoolById(userId);
         if (school == null) throw new ApiException("School not found");
@@ -177,7 +229,7 @@ public class SchoolService {
             throw new ApiException("The account is already rejected or active");
         }
 
-        student.setStatus("Rejected");
+        student.setStatus("Inactive");
         studentRepository.save(student);
     }
 
@@ -232,7 +284,19 @@ public class SchoolService {
             throw new ApiException("Cannot update status. The opportunity has already ended");
         }
 
+
+        if (request.getSupervisor_status().equalsIgnoreCase("approved") && status.equalsIgnoreCase("rejected")) {
+            throw new ApiException("Cannot reject after already approved");
+        }
+        if (request.getSupervisor_status().equalsIgnoreCase("rejected") && status.equalsIgnoreCase("approved")) {
+            throw new ApiException("Cannot approve after already rejected");
+        }
+        if (request.getSupervisor_status().equalsIgnoreCase(status)) {
+            throw new ApiException("Request already " + status.toLowerCase());
+        }
+
         request.setSupervisor_status(status.toLowerCase());
+
 
         if (status.equalsIgnoreCase("rejected")) {
             request.setStatus("rejected");
@@ -243,14 +307,18 @@ public class SchoolService {
 
         studentOpportunityRequestRepository.save(request);
 
-        String email = student.getUserStudent().getEmail();
-        sendVolunteerDecisionEmail(email, request.getStatus(),
-                request.getOpportunity().getTitle(),
-                request.getOpportunity().getOrganization().getName(),
-                request.getOpportunity().getLocation(),
-                request.getOpportunity().getStartDate(),
-                request.getOpportunity().getEndDate());
+        // ✅ فقط أرسل الإيميل إذا تم الموافقة من الطرفين
+        if ("approved".equalsIgnoreCase(request.getStatus())) {
+            String email = student.getUserStudent().getEmail();
+            sendVolunteerDecisionEmail(email, request.getStatus(),
+                    request.getOpportunity().getTitle(),
+                    request.getOpportunity().getOrganization().getName(),
+                    request.getOpportunity().getLocation(),
+                    request.getOpportunity().getStartDate(),
+                    request.getOpportunity().getEndDate());
+        }
     }
+
 
     public Map<String, Object> getStudentDetailsResponse(Integer studentId, MyUser currentUser) {
 
@@ -351,6 +419,8 @@ public class SchoolService {
             boolean alreadyOwned = ownedBadges.stream().anyMatch(b -> b.getId().equals(badge.getId()));
             if (totalHours >= badge.getCriteria() && !alreadyOwned) {
                 student.getBadges().add(badge);
+                int totalBadges = student.getBadges_count();
+                student.setBadges_count(totalBadges + 1);
             }
         }
 

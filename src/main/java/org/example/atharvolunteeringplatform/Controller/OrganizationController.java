@@ -79,14 +79,14 @@ public class OrganizationController {
     }
 
     //organization
-    @PostMapping("/reject-request/{requestId}")
+    @PutMapping("/reject-request/{requestId}")
     public ResponseEntity<?> rejectVolunteerRequest(@PathVariable Integer requestId,@AuthenticationPrincipal MyUser myUser ) {
         organizationService.rejectVolunteerRequest(requestId, myUser.getId());
         return ResponseEntity.status(HttpStatus.OK).body("Volunteer request rejected and email sent.");
     }
 
     //organization
-    @PostMapping("/accept-request/{requestId}")
+    @PutMapping("/accept-request/{requestId}")
     public ResponseEntity<?> acceptVolunteerRequest(@PathVariable Integer requestId,@AuthenticationPrincipal MyUser myUser) {
         organizationService.acceptVolunteerRequest(myUser.getId(), requestId);
         return ResponseEntity.status(HttpStatus.OK).body("Volunteer request accepted and email sent.");

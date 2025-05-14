@@ -12,6 +12,7 @@ import org.springframework.mail.MailSender;
 
 import org.springframework.mail.SimpleMailMessage;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +156,9 @@ public class OpportunityService {
         opportunityRepository.delete(opportunity);
     }
 
+    public List<Opportunity> getOrganizationOpportunities(Integer organizationId) {
+        return opportunityRepository.findOpportunityByOrganizationId(organizationId);
+    }
     //4
     public List<Opportunity> getOpportunitiesSortedByCapacity(Integer organizationId) {
         return opportunityRepository.findByOrganizationIdOrderByStudentCapacityDesc(organizationId);
@@ -356,4 +361,17 @@ public class OpportunityService {
         }
     }
 
+    @Scheduled(cron = "0 0 0 * * *") // كل يوم الساعة 12 صباحًا
+    public void autoCloseExpiredOpportunities() {
+        List<Opportunity> allOpportunities = opportunityRepository.findAll();
+        LocalDate now = LocalDate.now();
+
+        for (Opportunity opportunity : allOpportunities) {
+            if (opportunity.getEndDate().isBefore(now) &&
+                    !opportunity.getStatus().equalsIgnoreCase("closed")) {
+                opportunity.setStatus("closed");
+                opportunityRepository.save(opportunity);
+            }
+        }
+    }
 }

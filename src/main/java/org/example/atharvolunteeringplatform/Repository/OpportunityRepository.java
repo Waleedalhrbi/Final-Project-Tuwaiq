@@ -18,6 +18,8 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, Intege
     @Query("SELECT o FROM Opportunity o WHERE o.organization.id = ?1 AND o.status = 'open'")
     List<Opportunity> findOpenOpportunitiesByOrganizationId(Integer organizationId);
 
+    List<Opportunity> findOpportunityByOrganizationId(Integer organizationId);
+
     List<Opportunity> findOpportunitiesByOrganizationId(Integer organizationId);
 
 

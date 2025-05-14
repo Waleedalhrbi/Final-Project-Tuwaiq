@@ -17,8 +17,10 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
 
     StudentOpportunityRequest findStudentOpportunityRequestById(Integer id);
 
- 
-//***
+    @Query("SELECT s FROM StudentOpportunityRequest s WHERE s.opportunity.organization.id =?1")
+    List<StudentOpportunityRequest> findStudentOpportunityRequestsByOrganizationId(Integer organizationId);
+
+    //***
     StudentOpportunityRequest findByStudentAndOpportunity(Student student,Opportunity opportunity);
 
     List<StudentOpportunityRequest>findAllByStudentId(Integer studentId);
@@ -52,7 +54,7 @@ public interface StudentOpportunityRequestRepository extends JpaRepository<Stude
 
 
 
- 
+
 
     List<StudentOpportunityRequest> findAllByStudent(Student student);
 

@@ -29,8 +29,8 @@ public class MyUser implements UserDetails {
     private Integer id;
 
     @NotNull(message = "Username cannot be null")
-    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
-    @Column(columnDefinition = "varchar(20) not null UNIQUE")
+    @Size(min = 4, max = 30, message = "Username must be between 4 and 30 characters")
+    @Column(columnDefinition = "varchar(30) not null UNIQUE")
     private String username;
 
     @NotEmpty(message = "Please enter the student name")

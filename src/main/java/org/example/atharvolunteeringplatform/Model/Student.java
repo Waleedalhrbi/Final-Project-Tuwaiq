@@ -69,7 +69,6 @@ public class Student {
 
 
     @ManyToMany
-    @JsonIgnore
     private Set<Badge> badges;
 
     @ManyToOne

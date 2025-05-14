@@ -57,6 +57,7 @@ public class School {
     private Set<Student> students;
 
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Review> reviews;
 
 }
