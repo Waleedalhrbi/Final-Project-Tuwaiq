@@ -81,7 +81,7 @@ public class OrganizationController {
     //organization
     @PutMapping("/reject-request/{requestId}")
     public ResponseEntity<?> rejectVolunteerRequest(@PathVariable Integer requestId,@AuthenticationPrincipal MyUser myUser ) {
-        organizationService.rejectVolunteerRequest(requestId, myUser.getId());
+        organizationService.rejectVolunteerRequest(myUser.getId(),requestId);
         return ResponseEntity.status(HttpStatus.OK).body("Volunteer request rejected and email sent.");
     }
 

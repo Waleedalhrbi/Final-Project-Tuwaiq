@@ -13,10 +13,15 @@ public class PaymentService {
     @Value("${moyasar.api.key}")
     private String apiKey;
 
+    @Value("${app.base.url}")
+    private String baseUrl;
+
+
+
     public ResponseEntity<String> processPayment(PaymentRequest paymentRequest, Integer StudentId) {
         String url = "https://api.moyasar.com/v1/payments";
 
-        String callbackUrl = "http://localhost:8080/api/v1/payments/callback?studentId=" + StudentId;
+        String callbackUrl = baseUrl + "/api/v1/payments/callback?studentId=" + StudentId;
 
         String requestBody = String.format(
                 "source[type]=card&source[name]=%s&source[number]=%s&source[cvc]=%s&" +
@@ -27,7 +32,7 @@ public class PaymentService {
                 paymentRequest.getCvc(),
                 paymentRequest.getMonth(),
                 paymentRequest.getYear(),
-                2000, // 20 ريال
+                2000,
                 "SAR",
                 paymentRequest.getDescription(),
                 callbackUrl
@@ -41,5 +46,6 @@ public class PaymentService {
         RestTemplate restTemplate = new RestTemplate();
         return restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
     }
+
 
 }

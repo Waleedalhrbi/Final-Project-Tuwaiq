@@ -40,7 +40,7 @@ public class MyUser implements UserDetails {
 
     @NotEmpty(message = "Please enter an email")
     @Email(message = "Invalid email format")
-    @Column(columnDefinition = "varchar(100) not null unique")
+    @Column(columnDefinition = "varchar(35) not null unique")
     private String email;
 
     @NotEmpty(message = "Please enter a phone number")

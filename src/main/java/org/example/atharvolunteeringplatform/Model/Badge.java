@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class Badge {
     @Size(max = 255, message = "Description must not exceed 255 characters")
     private String description;
 
-//    @NotEmpty(message = "Criteria is required")
+    @NotNull(message = "PLease enter a criteria")
     private Integer criteria;
 
     @NotEmpty(message = "Image path is required")

@@ -207,4 +207,15 @@ public class OpportunityController {
         return ResponseEntity.ok(new ApiResponse("Status updated successfully"));
     }
 
+    //organization
+    @GetMapping("/get-Organization-Opportunities")
+    public ResponseEntity<?> getMyOpportunities(@AuthenticationPrincipal MyUser myUser) {
+        List<Opportunity> Org = opportunityService.getOpportunitiesByOrganization(myUser.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(Org);
+    }
+
+    @GetMapping("/opportunities-by-typ/{type}")
+    public ResponseEntity<?> getOpportunitiesByType(@PathVariable String type) {
+        return ResponseEntity.status(HttpStatus.OK).body(opportunityService.getOpportunitiesByType(type));
+    }
 }

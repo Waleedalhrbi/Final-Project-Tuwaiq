@@ -44,5 +44,6 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, Intege
 
     List<Opportunity> findByStartDateBetween(LocalDate from, LocalDate to);
 
+    List<Opportunity> findOpportunityByTypeOpportunity( String typeOpportunity);
 
 }
