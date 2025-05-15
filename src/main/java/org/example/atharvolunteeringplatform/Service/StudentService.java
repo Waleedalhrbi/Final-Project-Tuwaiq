@@ -88,7 +88,7 @@ public class StudentService {
         student.setGender(studentDTO.getGender());
         student.setStatus("Inactive");
 
-        // البحث عن المدرسة المطابقة
+
         School matchedSchool = null;
         for (School school : schools) {
             if (school != null && school.getName() != null && studentDTO.getSchool_name().equalsIgnoreCase(school.getName())) {

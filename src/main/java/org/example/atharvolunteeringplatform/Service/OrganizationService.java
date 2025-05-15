@@ -187,7 +187,7 @@ public class OrganizationService {
             throw new ApiException("Request is not in this organization");
         }
 
-        // ... نفس الكود السابق
+
 
         request.setOrganization_status("approved");
 
@@ -198,7 +198,7 @@ public class OrganizationService {
 
         studentOpportunityRequestRepository.save(request);
 
-        // ✅ فقط إذا تم اعتماد الطلب من الطرفين
+
         if ("approved".equalsIgnoreCase(request.getStatus())) {
             String to = request.getStudent().getUserStudent().getEmail();
             String subject = "قبول طلب التطوع";
