@@ -111,7 +111,7 @@ public class OpportunityService {
             throw new ApiException("Organization cannot update this opportunity");
         }
 
-        // ✅ If a new image was uploaded
+
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
 
@@ -131,7 +131,7 @@ public class OpportunityService {
             }
         }
 
-        // ✅ Update other fields
+
         oldOpportunity.setTitle(updatedOpportunity.getTitle());
         oldOpportunity.setTypeOpportunity(updatedOpportunity.getTypeOpportunity());
         oldOpportunity.setGender(updatedOpportunity.getGender());
