@@ -26,17 +26,22 @@ public class Opportunity {
 
 
     @NotEmpty(message = "Title is required")
-    @Size(max = 100, message = "Title must not exceed 100 characters")
+    @Size(max = 35, message = "Title must not exceed 35 characters")
+    @Column(columnDefinition = "varchar(35) not null")
     private String title;
 
     @NotEmpty(message = "Opportunity type is required")
+    @Column(columnDefinition = "varchar(30) not null")
     private String typeOpportunity;
 
     @NotEmpty(message = "Target gender is required")
+    @Pattern(regexp = "^(Male|Female)$", message = "Gender must be either Male or Female")
+    @Column(columnDefinition = "varchar(10) not null")
     private String gender;
 
     @NotEmpty(message = "Description is required")
-    @Size(max = 500, message = "Description must not exceed 500 characters")
+    @Size(max = 255, message = "Description must not exceed 255 characters")
+    @Column(columnDefinition = "varchar(255) not null")
     private String description;
 
     @NotNull(message = "Start date is required")

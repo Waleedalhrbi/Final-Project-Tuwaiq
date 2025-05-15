@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @font-face {
+            font-family: 'Amiri';
+            src: url('/fonts/GreatVibes-Regular.ttf');
+        }
+
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Amiri', serif;
+            background: #f9f9f9;
+            border: 10px solid #2ecc71;
+            padding: 40px;
+            color: #2c3e50;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        h1 {
+            font-family: 'Cairo', sans-serif;
+            font-size: 36px;
+            color: #2ecc71;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border: 2px solid #2ecc71;
+            border-radius: 10px;
+            background-color: #ffffff;
+            display: inline-block;
+        }
+
+        .name {
+            font-family: 'Cairo', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a5276;
+            margin: 30px 0;
+        }
+
+        p {
+            font-size: 20px;
+            margin: 12px 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .seal {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #f7dc6f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cairo', sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            color: #7d6608;
+            text-shadow: 0 1px 1px #fff;
+            box-shadow:
+                    inset 0 0 10px rgba(255, 255, 255, 0.4),
+                    0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 4px solid #b7950b;
+        }
+
+        .seal::before {
+            content: "Athar";
+            letter-spacing: 1px;
+        }
+
+        /* Optional: Remove decoration */
+        .decor-top,
+        .decor-bottom {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Volunteer Certificate</h1>
+    <p>The <strong>Athar</strong> platform hereby certifies that the student:</p>
+    <div class="name">{{studentName}}</div>
+    <p>Has successfully completed <strong>40 hours</strong> of volunteer work.</p>
+    <p>We sincerely thank them for their active contribution to community service.</p>
+    <div class="footer">
+        <p>Date of Issue: {{date}}</p>
+    </div>
+</div>
+
+<!-- Professional Gold Seal -->
+<div class="seal"></div>
+
+</body>
+</html>

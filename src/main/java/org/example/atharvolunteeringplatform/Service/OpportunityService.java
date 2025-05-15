@@ -374,4 +374,8 @@ public class OpportunityService {
             }
         }
     }
+
+    public List<Opportunity> getOpportunitiesByType(String type) {
+        return opportunityRepository.findOpportunityByTypeOpportunity(type);
+    }
 }

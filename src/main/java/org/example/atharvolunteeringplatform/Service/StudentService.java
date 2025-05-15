@@ -2,6 +2,7 @@ package org.example.atharvolunteeringplatform.Service;
 
 import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.BaseFont;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.atharvolunteeringplatform.Api.ApiException;
@@ -27,6 +28,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -255,46 +261,34 @@ public class StudentService {
         sendCertificateEmail(student.getUserStudent().getEmail(), pdf);
     }
     private byte[] generateCertificatePdf(String studentName) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
-            com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document, out);
-            document.open();
+        try {
+            // قراءة القالب من داخل resources/templates
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("templates/certificate-template.html");
 
-            // Load English font
-            String fontPath = "src/main/resources/fonts/GreatVibes-Regular.ttf";  // Change this to your actual font path
-            BaseFont baseFont = BaseFont.createFont(fontPath, BaseFont.WINANSI, BaseFont.EMBEDDED);
-            Font font = new Font(baseFont, 16, Font.NORMAL);
-            Font titleFont = new Font(baseFont, 20, Font.BOLD);
+            if (inputStream == null) {
+                throw new FileNotFoundException("certificate-template.html not found in resources/templates");
+            }
 
-            // Title
-            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("Certificate of Volunteering", titleFont);
-            title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            document.add(title);
+            String htmlTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-            document.add(new com.itextpdf.text.Paragraph(" ")); // Spacer
+            // تعويض القيم داخل القالب
+            String filledHtml = htmlTemplate
+                    .replace("{{studentName}}", studentName)
+                    .replace("{{date}}", LocalDate.now().toString());
 
-            // Content
-            com.itextpdf.text.Paragraph paragraph1 = new com.itextpdf.text.Paragraph(
-                    "This is to certify that the student " + studentName + " has completed 40 hours of voluntary work.", font);
-            paragraph1.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-            document.add(paragraph1);
+            // توليد PDF من HTML
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(filledHtml, null);
+            builder.toStream(outputStream);
+            builder.run();
 
-            com.itextpdf.text.Paragraph paragraph2 = new com.itextpdf.text.Paragraph(
-                    "We believe in the importance of volunteering and its positive impact on the community.", font);
-            paragraph2.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-            document.add(paragraph2);
-
-            com.itextpdf.text.Paragraph paragraph3 = new com.itextpdf.text.Paragraph(
-                    "Issued on: " + LocalDate.now(), font);
-            paragraph3.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-            document.add(paragraph3);
-
-            document.close();
-            return out.toByteArray();
+            return outputStream.toByteArray();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate PDF", e);
+            throw new RuntimeException("Failed to generate PDF from HTML", e);
         }
     }
+
 
 
 

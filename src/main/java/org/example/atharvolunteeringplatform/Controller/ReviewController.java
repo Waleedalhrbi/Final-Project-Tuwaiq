@@ -76,4 +76,9 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewCountForOpportunity(opportunityId, myUser.getId()));
     }
 
+
+    @GetMapping("/get-my-reviews")
+    public List<Review> getReviewsByOrganization(@AuthenticationPrincipal MyUser myUser) {
+        return reviewService.getMyReviews(myUser.getId());
+    }
 }

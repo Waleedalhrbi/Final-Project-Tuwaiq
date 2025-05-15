@@ -49,7 +49,7 @@ public class ConfigurationSecurity {
                         "/api/v1/student/completed-opportunities",
                         "/api/v1/student/hours-summary"
                 ).hasAuthority("student")
-
+                .requestMatchers( "/api/v1/opportunity/opportunities-by-typ/{type}").hasAuthority("student")
                 // مشرف
                 .requestMatchers("/api/v1/student/students-Inactive").hasAuthority("supervisor")
 
@@ -146,7 +146,7 @@ public class ConfigurationSecurity {
                         "/api/v1/opportunity/count/total"
                 ).hasAuthority("organization")
 
-                .requestMatchers("/api/v1/get-Open-Opportunities").permitAll()
+                .requestMatchers("/api/v1/get-Open-Opportunities").hasAnyAuthority("admin", "student")
 
                 // ================= Opportunity - admin ==================
                 .requestMatchers(
@@ -178,7 +178,8 @@ public class ConfigurationSecurity {
                         "/api/v1/review/organization/average-rating",
                         "/api/v1/review/organization/review-count",
                         "/api/v1/review/opportunity/{opportunityId}/average-rating",
-                        "/api/v1/review/opportunity/{opportunityId}/review-count"
+                        "/api/v1/review/opportunity/{opportunityId}/review-count",
+                        "/api/v1/review/get-my-reviews"
                 ).hasAuthority("organization")
 
                 .requestMatchers("/api/v1/badge/**").hasAuthority("admin")

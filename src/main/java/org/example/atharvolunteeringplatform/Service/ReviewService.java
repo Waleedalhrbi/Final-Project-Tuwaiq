@@ -148,6 +148,8 @@ public class ReviewService {
         return reviewRepository.countByOpportunity(opportunity);
     }
 
-
+    public List<Review> getMyReviews(Integer organizationId) {
+        return reviewRepository.findAllByOrganizationId(organizationId);
+    }
 
 }
